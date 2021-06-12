@@ -1,0 +1,48 @@
+.container{
+    display:flex;
+    flex-direction:row;
+    place-items: center;
+    height:100vh
+}
+.home-side-left{
+    position:relative;
+    background: linear-gradient(180deg, #0C7976 0%, #09BDB8 100%);
+    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25), -5px -5px 5px #75F5F5;
+    width:50%;
+    order: 0;
+    place-items: center;
+    height:100%;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+}
+.video-box{
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    
+    flex-wrap: wrap;
+    align-items: center;
+    width: 50%;
+    box-shadow: -5px -5px 4px #7ad6d3, 5px 5px 4px #11807C;
+    border-radius: 27px;
+    z-index: 1;
+}
+.footer-options{
+    display: flex;
+    flex-direction:row;
+    background: #0C7976;
+    box-shadow: inset -6px -6px 6px 1px rgba(16, 61, 59, 0.5), inset 6px 0px 6px 1px rgba(16, 61, 59, 0.5);
+    border-radius: 0px 0px 27px 27px;
+    width: 100%;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    justify-content:space-evenly;
+    place-items: center;
+}
+.mountainBackground{
+    width: 100%;
+    position: absolute;
+    bottom:0;
+    z-index: 0;
+}
