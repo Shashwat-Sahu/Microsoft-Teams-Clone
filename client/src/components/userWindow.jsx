@@ -3,7 +3,7 @@ import "../styles/userWindow.css"
 const UserWindow = ({hostRef,style}) => {
 
     return (
-            <video ref={hostRef} style={style} muted autoPlay playsInline />
+            <video ref={hostRef} style={style} muted autoPlay />
         )
 }
 

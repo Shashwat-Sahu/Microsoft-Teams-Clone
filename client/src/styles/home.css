@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@300&display=swap');
+
 .container{
     display:flex;
     flex-direction:row;
@@ -8,7 +10,7 @@
     position:relative;
     background: linear-gradient(180deg, #0C7976 0%, #09BDB8 100%);
     box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25), -5px -5px 5px #75F5F5;
-    width:50%;
+    width:40%;
     order: 0;
     place-items: center;
     height:100%;
@@ -17,18 +19,47 @@
     justify-content:center;
 }
 .video-box{
+    height: 350px;
     display:flex;
     flex-direction:column;
     justify-content:center;
-    
-    flex-wrap: wrap;
-    align-items: center;
-    width: 50%;
+    width: 55%;
+    min-width: 300px;
     box-shadow: -5px -5px 4px #7ad6d3, 5px 5px 4px #11807C;
     border-radius: 27px;
     z-index: 1;
 }
-.footer-options{
+.video{
+    flex-grow: 3;
+    border-radius: 27px 27px 0 0 ;
+    width: 100%;
+}
+.video-off-box{
+    width: 100%;
+    border-radius: 27px 27px 0 0;
+    flex-grow: 3;
+    height: 100%;
+    background-color: #0a6c79;
+    box-shadow:4px 4px 20px #044750b6 inset;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    place-items: center;
+    color: #fff;
+    font-family: ubuntu;
+}
+
+.video-off{
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border: 2px dashed #fff;
+    padding:5px;
+    color: #fff;
+    filter: drop-shadow(0px 4px 5px #000000);
+    font-size: 20px;
+}
+.footer-options-video{
     display: flex;
     flex-direction:row;
     background: #0C7976;
@@ -39,10 +70,127 @@
     padding-bottom: 20px;
     justify-content:space-evenly;
     place-items: center;
+    flex-grow: 1;
+    
+    border-top: 2px dashed #fff;
+}
+.video-set-buttons{
+    color: #fff;
+    filter: drop-shadow(0px 4px 5px #000000);
+    font-size: 25px
 }
 .mountainBackground{
     width: 100%;
     position: absolute;
     bottom:0;
     z-index: 0;
+}
+.logo-home{
+    position: absolute;
+    top:10px;
+    left: 10px;
+    width: 50px;
+    filter: drop-shadow(0px 4px 5px #3a3a3a)
+}
+.footer-options-video svg:hover{
+    cursor: pointer;
+}
+.home-side-right{
+    position:relative;
+
+    width:60%;
+    order: 1;
+    place-items: center;
+    height:100%;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+}
+.entry-box{
+    height: 350px;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-evenly;
+    flex-wrap: wrap;
+    align-items: center;
+    width: 50%;
+    min-width: 300px;
+    border: 2px solid #C4BCBC;
+    box-sizing: border-box;
+    border-radius: 27px;
+    z-index: 1; 
+    position: relative;  
+}
+.avatar-home{
+    width: 100px;
+    position: absolute;
+    top: -60px;
+    border: 1px dashed black;
+    border-radius:50%;
+    padding:10px;
+    background-color: #fff;
+}
+.home-bottom-vector{
+    width: 40%;
+    position: absolute;
+    bottom: 10px;
+}
+.email-input,.name-input{
+    width: 80%;
+    border: none;
+    outline: none;
+    border-bottom: 1px solid #C4BCBC;
+    padding:10px;
+    font-family: Ubuntu;
+}
+.home-entry-options
+{
+    display:flex;
+    flex-direction:row;
+    place-items: center;
+    width: 100%;
+    justify-content:space-around;
+}
+.home-entry-buttons{
+    padding:10px;
+    background-color:#0e8581;
+    color:#fff;
+    border: none;
+    border-radius: 27px;
+    box-shadow: 2px 2px 5px #03524e , 
+    -2px -2px 5px #fff;
+    font-weight: 800;
+    width: 40%;
+    font-family: "Ubuntu";
+}
+@media screen and (max-width:660px){
+    .container{
+        display:flex;
+        flex-direction:column;
+        place-items: center;
+        height:auto;
+    }
+    .home-side-left{
+        position:relative;
+        background: linear-gradient(180deg, #0C7976 0%, #09BDB8 100%);
+        box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25), -5px -5px 5px #75F5F5;
+        width:100%;
+        order: 0;
+        place-items: center;
+        display:flex;
+        flex-direction:column;
+        justify-content:center;
+        padding: 20px;
+    }
+    .home-side-right
+    {
+        padding-top: 100px;
+        width: 100%;
+    }
+    .video-box{
+        width: 75%;
+    }
+    .entry-box{
+        width:75%;
+    }
 }
