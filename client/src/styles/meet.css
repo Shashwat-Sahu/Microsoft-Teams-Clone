@@ -1,0 +1,32 @@
+.meet-parent{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    place-items: center;
+    background: url('https://wallpaperaccess.com/full/48071.jpg');
+    height:100vh
+}
+.members-row{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    place-items: center;
+}
+.camera-off-member{
+    width: 400px;
+    height: 200px;
+    background: linear-gradient(110.08deg, rgba(31, 59, 68, 0.4) 4.89%, rgba(31, 59, 68, 0.1) 93.4%);
+border-top: 1px solid rgba(255, 255, 255, 0.5);
+border-left: 1px solid rgba(255, 255, 255, 0.5);
+border-bottom: 1px solid rgba(31, 7, 116, 0.5);
+border-right: 1px solid rgba(31, 7, 116, 0.5);
+box-sizing: border-box;
+box-shadow: 0px 1px 24px -1px rgba(0, 0, 0, 0.1);
+backdrop-filter: blur(20px);
+/* Note: backdrop-filter has minimal browser support */
+
+border-radius: 27px
+}
+.video-on-meet{
+    
+}

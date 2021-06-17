@@ -1,20 +1,24 @@
 import React, { useEffect, useRef, useState } from "react";
+import {useHistory} from "react-router-dom"
 import UserVideo from "./userWindow"
 import "../styles/home.css"
 import { Icon } from '@iconify/react';
+import micMute from '@iconify/icons-bi/mic-mute';
 import micIcon from '@iconify/icons-bi/mic';
 import cameraVideo from '@iconify/icons-bi/camera-video';
 import cameraVideoOff from '@iconify/icons-bi/camera-video-off';
 import cameraVideoOffFill from '@iconify/icons-bi/camera-video-off-fill';
-import micMute from '@iconify/icons-bi/mic-mute';
 import Mountains_background from "../assets/mountains-home.png";
 import MicrosoftTeams from "../assets/microsoft-teams.svg";
 import Avatar from "../assets/avatar.png";
 import Group_Connect from "../assets/home-right-vector.png";
 import { Toggler, MediaInit } from "../utils/utilityFunctions"
-
-const Home = ({mic,setMic,camera,setCamera,hostRef}) => {
-
+import { v1 as uuid } from "uuid";
+const Home = (props) => {
+    const { mic, setMic, camera, setCamera, setStream, stream } = props;
+    console.log(props)
+    const history = useHistory();
+    const hostRef = useRef();
     const home_video_style = {
         width: "100%",
         borderRadius: "27px 27px 0 0",
@@ -23,7 +27,8 @@ const Home = ({mic,setMic,camera,setCamera,hostRef}) => {
         display: camera ? "block" : "none"
     }
     useEffect(() => {
-        MediaInit(camera, mic, hostRef)
+        MediaInit({ camera, mic, hostRef, setStream })
+
     }, [mic, camera])
 
     const ToggleState = (state, setState) => {
@@ -37,7 +42,7 @@ const Home = ({mic,setMic,camera,setCamera,hostRef}) => {
                 <div className="video-box">
 
                     <div className="video">
-                        <UserVideo hostRef={hostRef} style={home_video_style} />
+                        <UserVideo hostRef={hostRef} style={home_video_style} muted={true}/>
                     </div>
 
                     {!camera
@@ -87,8 +92,8 @@ const Home = ({mic,setMic,camera,setCamera,hostRef}) => {
                     <input type="email" placeholder="Enter Email ID" className="email-input" />
                     <input type="text" placeholder="Enter Name" className="name-input" />
                     <div className="home-entry-options">
-                    <button className="home-entry-buttons">Join Now</button>
-                    <button className="home-entry-buttons">Generate Link</button>
+                        <button className="home-entry-buttons" >Join Now</button>
+                        <button className="home-entry-buttons">Generate Link</button>
                     </div>
                 </div>
                 <img src={Group_Connect} className="home-bottom-vector" />
