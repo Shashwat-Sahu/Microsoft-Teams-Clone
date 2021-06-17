@@ -54,22 +54,18 @@ const Meet = (props) => {
     MediaInit({ camera, mic, hostRef, setStream }).then((stream) => {
       console.log("Promise stream", stream)
       hostRef.current.srcObject = stream;
-      if (!mic) {
+      if (!mic||!camera) {
         hostRef.current.srcObject.getTracks().forEach(function (track) {
           if (track.kind === "audio") {
-            track.stop();
+            track.enabled=mic;
           }
-        }
-        )
-      }
-      if (!camera) {
-        hostRef.current.srcObject.getTracks().forEach(function (track) {
           if (track.kind === "video") {
-            track.stop();
+            track.enabled=camera;
           }
         }
         )
       }
+      
       socketRef.current.emit("join room", roomID);
       socketRef.current.on("all users", (users) => {
         console.log("All Users", users)
@@ -173,7 +169,24 @@ const Meet = (props) => {
   const ToggleState = (state, setState) => {
     Toggler(state, setState);
   }
-
+  // useEffect(()=>{
+  //   if (mic) {
+  //     hostRef.current.srcObject.getTracks().forEach(function (track) {
+  //       if (track.kind === "audio") {
+  //         track.enabled=true;
+  //       }
+  //     }
+  //     )
+  //   }
+  //   if (camera) {
+  //     hostRef.current.srcObject.getTracks().forEach(function (track) {
+  //       if (track.kind === "video") {
+  //         track.enabled=true;
+  //       }
+  //     }
+  //     )
+  //   }
+  // },[camera,mic])
   return (<div className="meet-parent">
     <div className="members-row">
 
