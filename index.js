@@ -56,4 +56,10 @@ io.on('connection', socket => {
 
 });
 const PORT = process.env.PORT || 8000;
+if(process.env.PROD){
+    app.use( express.static(__dirname + '/client/build'));
+    app.get('*', (request, response) => {
+	    response.sendFile(path.join(__dirname, 'client/build/index.html'));
+    });
+}
 server.listen(PORT,()=>{console.log(`Server is running on ${PORT}`)})
