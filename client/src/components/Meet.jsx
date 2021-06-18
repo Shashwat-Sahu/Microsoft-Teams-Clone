@@ -60,8 +60,8 @@ const Meet = (props) => {
 
   useEffect(() => {
 
-    // socketRef.current = io.connect("https://microsoft-team-clone.herokuapp.com/");
-    socketRef.current = io.connect("http://localhost:8000");
+    socketRef.current = io.connect("https://microsoft-team-clone.herokuapp.com/");
+    // socketRef.current = io.connect("http://localhost:8000");
     createStream();
   }, []);
 
