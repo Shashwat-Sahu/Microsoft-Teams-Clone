@@ -9,12 +9,7 @@ const MediaInit = async ({camera,mic,hostRef,setStream}) =>{
 
          navigator.mediaDevices.getUserMedia({
             audio: true,
-            video: {
-                minAspectRatio: 1.333,
-                minFrameRate: 60,
-                height: window.innerHeight / 1.8,
-                width: window.innerWidth / 2,
-              }
+            video:true
         }).then(stream => {
             if (hostRef && hostRef.current)    
             {

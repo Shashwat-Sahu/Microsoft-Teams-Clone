@@ -10,15 +10,27 @@ import cameraVideo from '@iconify/icons-bi/camera-video';
 import cameraVideoOff from '@iconify/icons-bi/camera-video-off';
 import "../styles/meet.css"
 
-const CreateRef = ({ peer }) => {
+const CreateRef = ({ peer, style,options }) => {
+  console.log(peer)
   const clientRef = useRef();
+  var optionUser=peer.options?peer.options:{video:false,audio:false};
+  if(options)
+  optionUser=options;
   useEffect(() => {
-    peer.on("stream", (stream) => {
-      // console.log(stream)
+    peer.peer.on("stream", (stream) => {
+      console.log(stream.getTracks())
+      // setOptionUser({audio:stream.getTracks()[0].enabled,video:stream.getTracks()[1].enabled})
       clientRef.current.srcObject = stream
     })
+    console.log(optionUser)
   }, [])
-  return <UserVideo hostRef={clientRef} muted={false} />;
+
+  return <>
+    <UserVideo hostRef={clientRef} muted={false} style={{ ...style, display: optionUser.video ? "block" : "none" }} id={peer.peerID+"-video_on"}/>
+    <div className="camera-off-member" style={{ ...style, display: !optionUser.video ? "block" : "none"}} id={peer.peerID+"-video_off"}></div>
+  </>
+
+
 }
 
 const Meet = (props) => {
@@ -27,7 +39,7 @@ const Meet = (props) => {
   const [peers, setPeers] = useState([]);
   const [audioFlag, setAudioFlag] = useState(true);
   const [videoFlag, setVideoFlag] = useState(true);
-  const [userUpdate, setUserUpdate] = useState([]);
+  const [userUpdate, setUserUpdate] = useState();
   const socketRef = useRef();
   const userVideo = useRef();
   const peersRef = useRef([]);
@@ -42,53 +54,61 @@ const Meet = (props) => {
     boxShadow: "0px 1px 24px -1px rgba(0, 0, 0, 0.1)",
     borderRadius: "27px",
     objectFit: "cover",
+    margin: "20px"
   }
 
 
   useEffect(() => {
-    socketRef.current = io.connect("/");
+
+    // socketRef.current = io.connect("https://microsoft-team-clone.herokuapp.com/");
+    socketRef.current = io.connect("http://localhost:8000");
     createStream();
   }, []);
 
   function createStream() {
     MediaInit({ camera, mic, hostRef, setStream }).then((stream) => {
-      console.log("Promise stream", stream)
+
       hostRef.current.srcObject = stream;
-      if (!mic||!camera) {
+
+      {
         hostRef.current.srcObject.getTracks().forEach(function (track) {
           if (track.kind === "audio") {
-            track.enabled=mic;
+            track.enabled = mic;
           }
           if (track.kind === "video") {
-            track.enabled=camera;
+            track.enabled = camera;
           }
         }
         )
       }
-      
-      socketRef.current.emit("join room", roomID);
+      console.log("Promise stream", stream.getTracks())
+      var options = {audio:mic,video:camera}
+      socketRef.current.emit("join room", {roomID,options});
       socketRef.current.on("all users", (users) => {
         console.log("All Users", users)
         const peers = [];
         users.forEach((userID) => {
-          const peer = createPeer(userID, socketRef.current.id, stream);
+          const peer = createPeer(userID.id, socketRef.current.id, stream,options);
           peersRef.current.push({
-            peerID: userID,
+            peerID: userID.id,
             peer,
+            options: userID.options
           });
           peers.push({
-            peerID: userID,
+            peerID: userID.id,
             peer,
+            options: userID.options
           });
         });
         setPeers(peers);
       });
       socketRef.current.on("user joined", (payload) => {
-        console.log("User Joined", payload)
-        const peer = addPeer(payload.signal, payload.callerID, stream);
+        console.log("User Joined data", payload)
+        const peer = addPeer(payload.signal, payload.callerID, stream,payload.options);
         peersRef.current.push({
           peerID: payload.callerID,
           peer,
+          options:payload.options
         });
         // peers.push({
         //   peerID: payload.callerID,
@@ -97,7 +117,8 @@ const Meet = (props) => {
         const peerUpdate = peersRef.current.filter((p) => p.peerID !== payload.callerID);
         peerUpdate.push({
           peerID: payload.callerID,
-          peer
+          peer,
+          options:payload.options
         })
         setPeers(peerUpdate)
         console.log("Total Users", peers)
@@ -122,8 +143,7 @@ const Meet = (props) => {
       });
 
       socketRef.current.on("change", (payload) => {
-        console.log("change", payload);
-        setUserUpdate(payload);
+        setUserUpdate({id:payload.id,video:payload.video,audio:payload.audio});
       });
     });
   }
@@ -133,7 +153,7 @@ const Meet = (props) => {
     console.log("Peer ref", peersRef.current)
   })
 
-  function createPeer(userToSignal, callerID, stream) {
+  function createPeer(userToSignal, callerID, stream,options) {
     const peer = new Peer({
       initiator: true,
       trickle: false,
@@ -145,13 +165,15 @@ const Meet = (props) => {
         userToSignal,
         callerID,
         signal,
+        options
       });
     });
+
 
     return peer;
   }
 
-  function addPeer(incomingSignal, callerID, stream) {
+  function addPeer(incomingSignal, callerID, stream,options) {
     const peer = new Peer({
       initiator: false,
       trickle: false,
@@ -159,34 +181,56 @@ const Meet = (props) => {
     });
 
     peer.on("signal", (signal) => {
-      socketRef.current.emit("returning signal", { signal, callerID });
+      socketRef.current.emit("returning signal", { signal, callerID ,options});
     });
 
     peer.signal(incomingSignal);
 
     return peer;
   }
-  const ToggleState = (state, setState) => {
-    Toggler(state, setState);
+  const ToggleState = (kind, state, setState) => {
+    if (hostRef.current.srcObject && hostRef.current && hostRef) {
+      hostRef.current.srcObject.getTracks().forEach(function (track) {
+
+        if (track.kind === kind) {
+
+          socketRef.current.emit("change", {
+
+            id: socketRef.current.id,
+            video: kind == "video" ? !camera : camera,
+            audio: kind == "audio" ? !mic : mic,
+          });
+          track.enabled = kind == "audio" ? !mic : !camera;
+        }
+        Toggler(state, setState)
+      })
+    }
   }
-  // useEffect(()=>{
-  //   if (mic) {
-  //     hostRef.current.srcObject.getTracks().forEach(function (track) {
-  //       if (track.kind === "audio") {
-  //         track.enabled=true;
-  //       }
-  //     }
-  //     )
-  //   }
-  //   if (camera) {
-  //     hostRef.current.srcObject.getTracks().forEach(function (track) {
-  //       if (track.kind === "video") {
-  //         track.enabled=true;
-  //       }
-  //     }
-  //     )
-  //   }
-  // },[camera,mic])
+  useEffect(() => {
+    console.log("Peers", peers)
+    console.log("Peers", peersRef.current)
+    
+  },[peers,peersRef])
+  useEffect(() => {
+    console.log("Update", userUpdate);
+    if(userUpdate)
+    {
+    if(userUpdate.video) {
+      if(document.getElementById(userUpdate.id+"-video_on")&&document.getElementById(userUpdate.id+"-video_off"))
+      {
+      document.getElementById(userUpdate.id+"-video_on").style.display="block"
+      document.getElementById(userUpdate.id+"-video_off").style.display="none"
+      }
+    }
+    else{
+      if(document.getElementById(userUpdate.id+"-video_on")&&document.getElementById(userUpdate.id+"-video_off"))
+      {
+      document.getElementById(userUpdate.id+"-video_on").style.display="none"
+      document.getElementById(userUpdate.id+"-video_off").style.display="block"
+      }
+    }
+  }
+  })
   return (<div className="meet-parent">
     <div className="members-row">
 
@@ -195,68 +239,54 @@ const Meet = (props) => {
         ? null :
         <div className="camera-off-member"></div>
       }
-    </div>
-    {
-      peers.map(peer => {
-        return (
-          <CreateRef peer={peer.peer} />
-        )
-
-        // console.log(peer.peer)
-        // return(
-
-        // <UserVideo hostRef={ref} />
-
-        // )
-      })
-    }
-    <button onClick={() => {
-      if(hostRef.current.srcObject&&hostRef.current&&hostRef)
       {
-      hostRef.current.srcObject.getTracks().forEach(function (track) {
-
-        if (track.kind === "audio") {
-
-          socketRef.current.emit("change", [...userUpdate, {
-
-            id: socketRef.current.id,
-            video: camera,
-            audio: !mic,
-          }]);
-          track.enabled = !mic
-        }
-
-      })
-      ToggleState(mic, setMic)
-    }
-    }}>
-      {
-        mic ? <Icon icon={micIcon} />
-          :
-          <Icon icon={micMute} />
-      }</button>
-    <button onClick={() => {
-            if(hostRef.current.srcObject&&hostRef.current&&hostRef){
-      hostRef.current.srcObject.getTracks().forEach(function (track) {
-        if (track.kind === "video") {
-          socketRef.current.emit("change", [...userUpdate, {
-            id: socketRef.current.id,
-            video: !camera,
-            audio: mic,
-          }]);
-          track.enabled = !camera
-        }
-
-      })
-      ToggleState(camera, setCamera)
-    }
-    }}>
-      {
-        camera ? <Icon icon={cameraVideo} />
-          :
-          <Icon icon={cameraVideoOff} />
+        peers.map(peer => {
+          return <CreateRef peer={peer} style={style}/>
+        })
       }
-    </button>
+    </div>
+<div className="meet-options">
+    {
+      mic
+        ?
+        <Icon 
+        icon={micIcon} 
+        className="meet-controllers"
+        onClick={() => {
+
+          ToggleState("audio", mic, setMic)
+
+        }} />
+        :
+        <Icon 
+        icon={micMute} 
+        className="meet-controllers"
+        onClick={() => {
+
+          ToggleState("audio", mic, setMic)
+
+        }} />
+    }
+    {
+      camera
+        ?
+        <Icon 
+        icon={cameraVideo} 
+        className="meet-controllers"
+        onClick={() => {
+          ToggleState("video", camera, setCamera)
+
+        }} />
+        :
+        <Icon 
+        icon={cameraVideoOff} 
+        className="meet-controllers"
+        onClick={() => {
+          ToggleState("video", camera, setCamera)
+
+        }} />
+    }
+    </div>
   </div>
   )
 }

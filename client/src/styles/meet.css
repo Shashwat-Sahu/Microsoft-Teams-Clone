@@ -4,15 +4,19 @@
     justify-content: center;
     place-items: center;
     background: url('https://wallpaperaccess.com/full/48071.jpg');
+    background-repeat: no-repeat;
+    background-size: cover;
     height:100vh
 }
 .members-row{
     display: flex;
     flex-direction: row;
-    justify-content: center;
+    justify-content: space-around;
     place-items: center;
+    flex-wrap: wrap;
 }
 .camera-off-member{
+    margin: 20px;
     width: 400px;
     height: 200px;
     background: linear-gradient(110.08deg, rgba(31, 59, 68, 0.4) 4.89%, rgba(31, 59, 68, 0.1) 93.4%);
@@ -28,5 +32,47 @@ backdrop-filter: blur(20px);
 border-radius: 27px
 }
 .video-on-meet{
+    
+}
+.meet-options{
+    display: flex;
+    flex-direction:row;
+    justify-content: space-around;
+    place-items: center;
+    background: linear-gradient(110.08deg, rgba(31, 59, 68, 0.4) 4.89%, rgba(31, 59, 68, 0.1) 93.4%);
+    border-top: 1px solid rgba(255, 255, 255, 0.5);
+    border-left: 1px solid rgba(255, 255, 255, 0.5);
+    border-bottom: 1px solid rgba(31, 7, 116, 0.5);
+    border-right: 1px solid rgba(31, 7, 116, 0.5);
+    box-sizing: border-box;
+    box-shadow: 0px 1px 24px -1px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(20px);
+    width: 300px;
+    padding:10px;
+    border-radius: 27px;
+
+}
+.meet-controllers
+{
+    color: #fff;
+    font-size: 2em;
+}
+.meet-controllers:hover{
+    cursor: pointer;
+}
+@media screen and (max-width:660px) {
+    .members-row{
+        width: 100%;
+        overflow:auto;
+    }
+    .meet-parent{
+        flex-direction: column-reverse;
+    }
+    .meet-options{
+        margin: 10px;
+    }
+    .camera-off-member{
+        width: 90%;
+    }
     
 }
