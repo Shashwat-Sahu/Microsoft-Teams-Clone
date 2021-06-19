@@ -13,9 +13,13 @@ import MicrosoftTeams from "../assets/microsoft-teams.svg";
 import Avatar from "../assets/avatar.png";
 import Group_Connect from "../assets/home-right-vector.png";
 import { Toggler, MediaInit } from "../utils/utilityFunctions"
+import {connect} from 'react-redux';
 import { v1 as uuid } from "uuid";
+
+
+
 const Home = (props) => {
-    const { mic, setMic, camera, setCamera, setStream, stream } = props;
+    const { mic, setMic, camera, setCamera, setStream, stream, name,setName,email,setEmail } = props;
     console.log(props)
     const history = useHistory();
     const hostRef = useRef();
@@ -89,10 +93,27 @@ const Home = (props) => {
             <div className="home-side-right">
                 <div className="entry-box">
                     <img src={Avatar} className="avatar-home" alt="Avatar" />
-                    <input type="email" placeholder="Enter Email ID" className="email-input" />
-                    <input type="text" placeholder="Enter Name" className="name-input" />
+                    <input 
+                    type="email" 
+                    placeholder="Enter Email ID" 
+                    className="email-input" 
+                    onChange={(e)=>{setEmail(e.target.value)}}
+                    
+                    />
+                    <input 
+                    type="text" 
+                    placeholder="Enter Name" 
+                    className="name-input" 
+                    onChange={(e)=>{setName(e.target.value)}}
+                    
+                    />
                     <div className="home-entry-options">
-                        <button className="home-entry-buttons" >Join Now</button>
+                        <button 
+                        className="home-entry-buttons" 
+                        onClick={()=>{
+                          history.push(`/teams/${uuid()}`)
+                        }}
+                        >Join Now</button>
                         <button className="home-entry-buttons">Generate Link</button>
                     </div>
                 </div>
@@ -101,4 +122,54 @@ const Home = (props) => {
         </div>)
 }
 
-export default Home
+const mapStateToProps = state => {
+    return {
+      email: state.userDetails.email,
+      name: state.userDetails.name,
+      mic: state.userDetails.mic,
+      camera: state.userDetails.camera,
+      stream: state.userDetails.stream
+    }
+  }
+  
+  const mapDispatchToProps = dispatch => {
+    return {
+      
+      setEmail: data => {
+        dispatch({
+          type: 'SET_EMAIL',
+          email: data,
+        })
+      },
+      setName: data => {
+        dispatch({
+          type: 'SET_NAME',
+          name: data
+        })
+      },
+      setMic: data => {
+        dispatch({
+          type: 'SET_MIC',
+          mic: data
+        })
+      }
+      ,
+      setCamera: data => {
+        dispatch({
+          type: 'SET_CAMERA',
+          camera: data
+        })
+      }
+      ,
+      setStream: data => {
+        dispatch({
+          type: 'SET_STREAM',
+          stream: data
+        })
+      }
+    }
+  }
+  
+  
+  
+  export default connect(mapStateToProps, mapDispatchToProps)(Home)

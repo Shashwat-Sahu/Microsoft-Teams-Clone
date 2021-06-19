@@ -18,16 +18,16 @@ const users = {};
 const socketToRoom = {};
 
 io.on('connection', socket => {
-    socket.on("join room", ({roomID,options}) => {
+    socket.on("join room", ({roomID,options,name}) => {
         if (users[roomID]) {
             const length = users[roomID].length;
             if (length === 100) {
                 socket.emit("room full");
                 return;
             }
-            users[roomID].push({id:socket.id,options});
+            users[roomID].push({id:socket.id,options,name});
         } else {
-            users[roomID] = [{id:socket.id,options}];
+            users[roomID] = [{id:socket.id,options,name}];
         }
         socketToRoom[socket.id] = roomID;
         const usersInThisRoom = users[roomID].filter(user => user.id !== socket.id);
@@ -35,14 +35,15 @@ io.on('connection', socket => {
     });
 
     socket.on("sending signal", payload => {
-        io.to(payload.userToSignal).emit('user joined', { signal: payload.signal, callerID: payload.callerID,options:payload.options });
+        io.to(payload.userToSignal).emit('user joined', { signal: payload.signal, callerID: payload.callerID,options:payload.options,name:payload.name });
     });
 
     socket.on("returning signal", payload => {
-        io.to(payload.callerID).emit('receiving returned signal', { signal: payload.signal, id: socket.id,options:payload.options });
+        io.to(payload.callerID).emit('receiving returned signal', { signal: payload.signal, id: socket.id,options:payload.options,name:payload.name });
     });
 
     socket.on('disconnect', () => {
+        console.log("User left id",socket.id)
         const roomID = socketToRoom[socket.id];
         let room = users[roomID];
         if (room) {

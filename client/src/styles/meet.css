@@ -20,20 +20,31 @@
     width: 400px;
     height: 200px;
     background: linear-gradient(110.08deg, rgba(31, 59, 68, 0.4) 4.89%, rgba(31, 59, 68, 0.1) 93.4%);
-border-top: 1px solid rgba(255, 255, 255, 0.5);
-border-left: 1px solid rgba(255, 255, 255, 0.5);
-border-bottom: 1px solid rgba(31, 7, 116, 0.5);
-border-right: 1px solid rgba(31, 7, 116, 0.5);
-box-sizing: border-box;
-box-shadow: 0px 1px 24px -1px rgba(0, 0, 0, 0.1);
-backdrop-filter: blur(20px);
-/* Note: backdrop-filter has minimal browser support */
+    border-top: 1px solid rgba(255, 255, 255, 0.5);
+    border-left: 1px solid rgba(255, 255, 255, 0.5);
+    border-bottom: 1px solid rgba(31, 7, 116, 0.5);
+    border-right: 1px solid rgba(31, 7, 116, 0.5);
+    box-sizing: border-box;
+    box-shadow: 0px 1px 24px -1px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(20px);
+    /* Note: backdrop-filter has minimal browser support */
+    border-radius: 27px;
+    display: flex;
+    justify-content: center;
+    place-items: center;
+}
+.member-name{
+    width:90px;
+    height:90px;
+    border-radius: 50%;
+    display: flex;
+    justify-content:center;
+    place-items: center;
+    color: #ffffff;
+    font-size: 2rem;
+    box-shadow:5px 5px 10px rgb(51, 50, 50),-1px -1px 5px #ffffff;
+}
 
-border-radius: 27px
-}
-.video-on-meet{
-    
-}
 .meet-options{
     display: flex;
     flex-direction:row;
@@ -60,6 +71,39 @@ border-radius: 27px
 .meet-controllers:hover{
     cursor: pointer;
 }
+.Modal-Box-Meet-options{
+    display: flex;
+    justify-content: space-evenly;
+    place-items: center;
+}
+.meet-modal-controllers{
+    font-size:1.4em
+}
+.ReactModal__Content
+{
+    width: 400px;
+    height: 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+}
+
+.name-input-meet{
+    width: 80%;
+    border: none;
+    outline: none;
+    border-bottom: 1px solid #C4BCBC;
+    padding:10px;
+    font-family: Ubuntu;
+    margin: 10px;
+    font-size: 1.1em;
+}
+.Modal-Box-Meet-footer{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    place-items: center;
+}
 @media screen and (max-width:660px) {
     .members-row{
         width: 100%;
@@ -74,5 +118,8 @@ border-radius: 27px
     .camera-off-member{
         width: 90%;
     }
-    
+    .ReactModal__Content
+    {
+        width: 70%;
+    }
 }
