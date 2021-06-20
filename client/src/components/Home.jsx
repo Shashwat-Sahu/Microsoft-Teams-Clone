@@ -20,14 +20,13 @@ import { v1 as uuid } from "uuid";
 
 const Home = (props) => {
     const { mic, setMic, camera, setCamera, setStream, stream, name,setName,email,setEmail } = props;
-    console.log(props)
     const history = useHistory();
     const hostRef = useRef();
     const home_video_style = {
         width: "100%",
         borderRadius: "27px 27px 0 0",
         height: "100%",
-        objectFit: "cover",
+        objectFit: "contain",
         display: camera ? "block" : "none"
     }
     useEffect(() => {
@@ -114,7 +113,11 @@ const Home = (props) => {
                           history.push(`/teams/${uuid()}`)
                         }}
                         >Join Now</button>
-                        <button className="home-entry-buttons">Generate Link</button>
+                        <button 
+                        className="home-entry-buttons"
+                        >
+                          Generate Link
+                        </button>
                     </div>
                 </div>
                 <img src={Group_Connect} className="home-bottom-vector" />

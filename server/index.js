@@ -42,9 +42,10 @@ io.on('connection', socket => {
         io.to(payload.callerID).emit('receiving returned signal', { signal: payload.signal, id: socket.id,options:payload.options,name:payload.name });
     });
 
-    socket.on('disconnect', () => {
-        console.log("User left id",socket.id)
+    socket.on('disconnectMeet', () => {
+
         const roomID = socketToRoom[socket.id];
+        console.log(`User ${socket.id} left from room: ${roomID}`);
         let room = users[roomID];
         if (room) {
             room = room.filter(user => user.id !== socket.id);
@@ -60,7 +61,13 @@ io.on('connection', socket => {
         // console.log(JSON.stringify(users))
         socket.broadcast.emit('change',payload)
     });
+    socket.on("send message",(payload)=>{
+        users[payload.roomID].forEach(user=>{
+            if(socket.id!==user.id)
+            io.to(user.id).emit('receivedMessage',payload)
+        })
 
+    })
 });
 
 app.get("/",(req,res)=>{

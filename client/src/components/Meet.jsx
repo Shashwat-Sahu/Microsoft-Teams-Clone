@@ -8,10 +8,15 @@ import micMute from '@iconify/icons-bi/mic-mute';
 import micIcon from '@iconify/icons-bi/mic';
 import cameraVideo from '@iconify/icons-bi/camera-video';
 import cameraVideoOff from '@iconify/icons-bi/camera-video-off';
+import bxsMessageAltDetail from '@iconify/icons-bx/bxs-message-alt-detail';
+import phoneOff from '@iconify/icons-carbon/phone-off';
+import MicrosoftTeams from "../assets/microsoft-teams.svg";
+import Chats from "./Chats";
 import { connect } from 'react-redux';
 import "../styles/meet.css"
 import { useBeforeunload } from 'react-beforeunload';
 import Modal from 'react-modal';
+import { useHistory } from 'react-router-dom'
 
 const CreateRef = ({ peer, style, options }) => {
   console.log(peer)
@@ -51,13 +56,15 @@ const Meet = (props) => {
   const { camera, mic, setMic, setCamera, stream, setStream, name, email, setName, setEmail } = props;
   const hostRef = useRef()
   const [peers, setPeers] = useState([]);
-  const [audioFlag, setAudioFlag] = useState(true);
-  const [videoFlag, setVideoFlag] = useState(true);
   const [userUpdate, setUserUpdate] = useState();
   const [modalIsOpen, setIsOpen] = useState(name == "Anonymous" ? true : false)
   const socketRef = useRef();
-  const userVideo = useRef();
   const peersRef = useRef([]);
+  const chatsRef = useRef([]);
+  const history = useHistory()
+  const [openChat,setOpenChat] = useState(false);
+  const [chats, setChats] = useState([])
+
   const customStylesModal = {
     overlay: {
       backgroundColor: 'rgba(0,0,0,0.7)'
@@ -88,24 +95,52 @@ const Meet = (props) => {
   useEffect(() => {
     if (name != "Anonymous")
       startStream()
+
   }, [])
 
   useBeforeunload((event) => {
-    
-
-
-    if(socketRef&&socketRef.current){
-      socketRef.current.emit("disconnect")
+    if (socketRef && socketRef.current) {
+      socketRef.current.emit("disconnectMeet")
     }
   });
+
+  const disconnectMeet = () =>{
+    // socketRef.current.emit("disconnectMeet")
+    
+      window.location="/"
+    
+
+  }
 
   const startStream = () => {
     setIsOpen(false)
     socketRef.current = io.connect("https://microsoft-team-clone.herokuapp.com/");
     // socketRef.current = io.connect("http://localhost:8000");
     createStream();
+    startChat()
   }
 
+  const startChat = () => {
+    socketRef.current.on("receivedMessage", (message) => {
+      console.log("Message",message)
+      console.log("Here",chats)
+      chatsRef.current = [...chatsRef.current, { name: message.name, message: message.message }];
+      const chatsUpdated = chatsRef.current;
+      setChats(chatsUpdated)
+      
+    })
+  }
+  const sendMessage = (sendMessage) => {
+    const payload = { name, message:sendMessage,senderId:socketRef.current.id,roomID };
+    socketRef.current.emit("send message", payload);
+    chatsRef.current = [...chatsRef.current, { name: "You", message: payload.message }]
+    const chatsUpdated = chatsRef.current;
+    setChats(chatsUpdated)
+    
+  }
+  useEffect(() => {
+    console.log("Chats",chats)
+  })
   function createStream() {
     MediaInit({ camera, mic, hostRef, setStream }).then((stream) => {
 
@@ -173,10 +208,9 @@ const Meet = (props) => {
         console.log("User Left", id);
         const index = peersRef.current.findIndex((p) => p.peerID === id);
 
-        if (index!=-1) {
-          if(peersRef[index])
-          {
-          peersRef[index].peer.destroy();
+        if (index != -1) {
+          if (peersRef[index]) {
+            peersRef[index].peer.destroy();
           }
           // var videoBox = document.getElementById(id + "-video_on")
           // var videoOffBox = document.getElementById(id + "-video_off")
@@ -204,10 +238,7 @@ const Meet = (props) => {
     });
   }
 
-  useEffect(() => {
-    console.log("All peers", peers);
-    console.log("Peer ref", peersRef.current)
-  })
+
 
   function createPeer(userToSignal, callerID, stream, options, name) {
     const peer = new Peer({
@@ -303,47 +334,47 @@ const Meet = (props) => {
           onChange={(e) => { setName(e.target.value) }}
         />
         <div className="Modal-Box-Meet-options">
-        {
-          mic
-            ?
-            <Icon
-              icon={micIcon}
-              className="meet-modal-controllers"
-              onClick={() => {
+          {
+            mic
+              ?
+              <Icon
+                icon={micIcon}
+                className="meet-modal-controllers"
+                onClick={() => {
 
-                setMic(!mic)
+                  setMic(!mic)
 
-              }} />
-            :
-            <Icon
-              icon={micMute}
-              className="meet-modal-controllers"
-              onClick={() => {
+                }} />
+              :
+              <Icon
+                icon={micMute}
+                className="meet-modal-controllers"
+                onClick={() => {
 
-                setMic(!mic)
+                  setMic(!mic)
 
-              }} />
-        }
-        {
-          camera
-            ?
-            <Icon
-              icon={cameraVideo}
-              className="meet-modal-controllers"
-              onClick={() => {
-                setCamera(!camera)
+                }} />
+          }
+          {
+            camera
+              ?
+              <Icon
+                icon={cameraVideo}
+                className="meet-modal-controllers"
+                onClick={() => {
+                  setCamera(!camera)
 
-              }} />
-            :
-            <Icon
-              icon={cameraVideoOff}
-              className="meet-modal-controllers"
-              onClick={() => {
-                setCamera(!camera)
+                }} />
+              :
+              <Icon
+                icon={cameraVideoOff}
+                className="meet-modal-controllers"
+                onClick={() => {
+                  setCamera(!camera)
 
-              }} />
-        }
-          </div>
+                }} />
+          }
+        </div>
         <div className="Modal-Box-Meet-footer">
           <button
             className="home-entry-buttons"
@@ -357,63 +388,80 @@ const Meet = (props) => {
       </Modal>
 
 
-
-      <div className="members-row">
-
-        <UserVideo hostRef={hostRef} muted={true} style={style} />
-        {camera
-          ? null :
-          <div className="camera-off-member">
-            <div className="member-name">{name.slice(0, 1)}</div>
+      <div className="meet-outer-layout">
+        <div className="members-with-config">
+        <div className="meet-icons">
+            <img src={MicrosoftTeams} className="meet-teams-logo"/>
+            <Icon 
+            icon={bxsMessageAltDetail} 
+            className="chat-opener"
+            onClick={()=>{setOpenChat(!openChat)}}
+            />
+            </div>
+          <div className="members-row">
+            <UserVideo hostRef={hostRef} muted={true} style={style} />
+            {camera
+              ? null :
+              <div className="camera-off-member">
+                <div className="member-name">{name.slice(0, 1)}</div>
+              </div>
+            }
+            {
+              peers.map(peer => {
+                return <CreateRef peer={peer} style={style} />
+              })
+            }
           </div>
-        }
-        {
-          peers.map(peer => {
-            return <CreateRef peer={peer} style={style} />
-          })
-        }
-      </div>
-      <div className="meet-options">
-        {
-          mic
-            ?
-            <Icon
-              icon={micIcon}
-              className="meet-controllers"
-              onClick={() => {
+          <div className="meet-options">
+            {
+              mic
+                ?
+                <Icon
+                  icon={micIcon}
+                  className="meet-controllers"
+                  onClick={() => {
 
-                ToggleState("audio", mic, setMic)
+                    ToggleState("audio", mic, setMic)
 
-              }} />
-            :
-            <Icon
-              icon={micMute}
-              className="meet-controllers"
-              onClick={() => {
+                  }} />
+                :
+                <Icon
+                  icon={micMute}
+                  className="meet-controllers"
+                  onClick={() => {
 
-                ToggleState("audio", mic, setMic)
+                    ToggleState("audio", mic, setMic)
 
-              }} />
-        }
-        {
-          camera
-            ?
-            <Icon
-              icon={cameraVideo}
-              className="meet-controllers"
-              onClick={() => {
-                ToggleState("video", camera, setCamera)
+                  }} />
+            }
+            <Icon 
+            className="meet-controllers" 
+            icon={phoneOff}
+            onClick={disconnectMeet}
+            />
 
-              }} />
-            :
-            <Icon
-              icon={cameraVideoOff}
-              className="meet-controllers"
-              onClick={() => {
-                ToggleState("video", camera, setCamera)
+            {
+              camera
+                ?
+                <Icon
+                  icon={cameraVideo}
+                  className="meet-controllers"
+                  onClick={() => {
+                    ToggleState("video", camera, setCamera)
 
-              }} />
-        }
+                  }} />
+                :
+                <Icon
+                  icon={cameraVideoOff}
+                  className="meet-controllers"
+                  onClick={() => {
+                    ToggleState("video", camera, setCamera)
+
+                  }} />
+            }
+          </div>
+        </div>
+      <Chats chats={chats} sendMessage={sendMessage} openChat={openChat} setOpenChat={setOpenChat}/>
       </div>
     </div>
   )
