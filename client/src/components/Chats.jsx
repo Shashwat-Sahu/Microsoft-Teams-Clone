@@ -15,12 +15,12 @@ const Chats = ({chats,sendMessage,openChat,setOpenChat}) =>{
         if(!openChat)
         {
             ele.style.animation="slide-left 1s ease-in-out forwards"
-            document.getElementsByClassName('members-with-config')[0].style.animation="meet-slide-right 1s ease-in-out forwards"
+            document.getElementsByClassName('meet-outer-layout')[0].style.animation="meet-slide-right 1s ease-in-out forwards"
         }
         else
         {
             ele.style.animation="slide-right 1s ease-in-out forwards"
-            document.getElementsByClassName('members-with-config')[0].style.animation="meet-slide-left 1s ease-in-out forwards"   
+            document.getElementsByClassName('meet-outer-layout')[0].style.animation="meet-slide-left 1s ease-in-out forwards"   
         }
         
     },[openChat])

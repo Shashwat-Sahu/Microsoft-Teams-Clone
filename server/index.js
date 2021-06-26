@@ -21,7 +21,7 @@ io.on('connection', socket => {
     socket.on("join room", ({roomID,options,name}) => {
         if (users[roomID]) {
             const length = users[roomID].length;
-            if (length === 100) {
+            if (length === 10) {
                 socket.emit("room full");
                 return;
             }
@@ -42,6 +42,7 @@ io.on('connection', socket => {
         io.to(payload.callerID).emit('receiving returned signal', { signal: payload.signal, id: socket.id,options:payload.options,name:payload.name });
     });
 
+    
     socket.on('disconnectMeet', () => {
 
         const roomID = socketToRoom[socket.id];
@@ -52,13 +53,15 @@ io.on('connection', socket => {
             users[roomID] = room;
         }
         socket.broadcast.emit('user left',socket.id)
+        socket.broadcast.emit('user left screen stream',socket.id+"-screen-share")
+        
     });
 
     socket.on('change', (payload) => {
-        // console.log(payload)
+        
         const index = users[socketToRoom[socket.id]].findIndex(user=>user.id === socket.id)
         users[socketToRoom[socket.id]][index].options={video:payload.video,audio:payload.audio};
-        // console.log(JSON.stringify(users))
+        
         socket.broadcast.emit('change',payload)
     });
     socket.on("send message",(payload)=>{
@@ -68,6 +71,24 @@ io.on('connection', socket => {
         })
 
     })
+
+
+    socket.on("sending screen stream", payload => {
+        io.to(payload.userToSignal).emit('user added screen stream', { signal: payload.signal, callerID: payload.callerID });
+    });
+
+    socket.on("returning screen stream", payload => {
+        io.to(payload.callerID).emit('receiving returned screen stream', { signal: payload.signal, id: socket.id+"-screen-share" });
+    });
+
+    socket.on("screen stream update",(payload)=>{
+        users[payload.roomID].forEach(user=>{
+            if(socket.id!==user.id)
+            io.to(user.id).emit('screen share update',{updateStream:payload.updateStream,id:socket.id});
+        })
+
+    })
+
 });
 
 app.get("/",(req,res)=>{

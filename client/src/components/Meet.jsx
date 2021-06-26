@@ -11,6 +11,7 @@ import cameraVideoOff from '@iconify/icons-bi/camera-video-off';
 import bxsMessageAltDetail from '@iconify/icons-bx/bxs-message-alt-detail';
 import phoneOff from '@iconify/icons-carbon/phone-off';
 import MicrosoftTeams from "../assets/microsoft-teams.svg";
+import shareScreenStart28Filled from '@iconify/icons-fluent/share-screen-start-28-filled';
 import Chats from "./Chats";
 import { connect } from 'react-redux';
 import "../styles/meet.css"
@@ -18,8 +19,12 @@ import { useBeforeunload } from 'react-beforeunload';
 import Modal from 'react-modal';
 import { useHistory } from 'react-router-dom'
 
+
+
+
 const CreateRef = ({ peer, style, options }) => {
-  console.log(peer)
+
+
   const clientRef = useRef();
 
   var optionUser = peer.options ? peer.options : { video: false, audio: false };
@@ -28,8 +33,13 @@ const CreateRef = ({ peer, style, options }) => {
     optionUser = options;
   useEffect(() => {
     peer.peer.on("stream", (stream) => {
+      
       clientRef.current.srcObject = stream
     })
+    peer.peer.on("track", (track, stream) => {
+      console.log(stream)
+    })
+
     console.log(optionUser)
   }, [])
 
@@ -53,17 +63,33 @@ const CreateRef = ({ peer, style, options }) => {
 
 const Meet = (props) => {
 
-  const { camera, mic, setMic, setCamera, stream, setStream, name, email, setName, setEmail } = props;
+  const { camera, mic, setMic, setCamera, stream, setStream, name, email, setName, setEmail,setVideoDevices,setAudioDevices } = props;
   const hostRef = useRef()
   const [peers, setPeers] = useState([]);
   const [userUpdate, setUserUpdate] = useState();
+  // Modal to ask Name from user (optional)
   const [modalIsOpen, setIsOpen] = useState(name == "Anonymous" ? true : false)
+  const [chatBadge, setChatBadge] = useState(false)
+
   const socketRef = useRef();
   const peersRef = useRef([]);
   const chatsRef = useRef([]);
+  // Storing peers for screen Share in ref
+  const screenSharesRef = useRef([]);
+  // Storing peers for screen Share as a state
+  const [screenShares,setScreenShares] = useState([])
+  // screenStream is to store screen stream
+  const screenStream = useRef()
+  // screenStreamComponent is ref video screen share element
+  const screenStreamComponent = useRef()
+  // Storing screen streams for each person
+  const userScreenStreams = useRef([])
+  const chatOpenedRef = useRef();
   const history = useHistory()
-  const [openChat,setOpenChat] = useState(false);
+  const [openChat, setOpenChat] = useState(false);
   const [chats, setChats] = useState([])
+
+  const [screenSharingEnabled,setScreenSharingEnabled] = useState(false)
 
   const customStylesModal = {
     overlay: {
@@ -82,7 +108,8 @@ const Meet = (props) => {
   const roomID = props.match.params.teamId;
 
   const style = {
-    width: "400px",
+    width: "80%",
+    maxWidth: "400px",
     height: "200px",
     display: camera ? "block" : "none",
     boxSizing: "border-box",
@@ -95,20 +122,22 @@ const Meet = (props) => {
   useEffect(() => {
     if (name != "Anonymous")
       startStream()
-
+    chatOpenedRef.current = openChat;
   }, [])
 
   useBeforeunload((event) => {
+    
     if (socketRef && socketRef.current) {
       socketRef.current.emit("disconnectMeet")
     }
+
   });
 
-  const disconnectMeet = () =>{
+  const disconnectMeet = () => {
     // socketRef.current.emit("disconnectMeet")
-    
-      window.location="/"
-    
+
+    window.location = "/"
+
 
   }
 
@@ -122,30 +151,66 @@ const Meet = (props) => {
 
   const startChat = () => {
     socketRef.current.on("receivedMessage", (message) => {
-      console.log("Message",message)
-      console.log("Here",chats)
+      console.log(openChat)
+      !chatOpenedRef.current ? setChatBadge(true) : setChatBadge(false);
       chatsRef.current = [...chatsRef.current, { name: message.name, message: message.message }];
       const chatsUpdated = chatsRef.current;
       setChats(chatsUpdated)
-      
+
     })
   }
+  const screenShare = () => {
+    if(!screenSharingEnabled)
+    {
+    navigator.mediaDevices.getDisplayMedia({ video: true }).then(screenStreamUpdate => {
+      setScreenSharingEnabled(true)
+      screenStreamComponent.current.srcObject = screenStreamUpdate
+      socketRef.current.emit("screen stream update",{updateStream:true,roomID})
+      screenSharesRef.current.forEach((screenRef)=>{
+        screenRef.peer.replaceTrack(screenStream.current.getTracks()[1],screenStreamUpdate.getTracks()[0],screenStream.current)
+      })
+      screenStreamUpdate.getVideoTracks()[0].onended = function () {
+        setScreenSharingEnabled(false)
+        socketRef.current.emit("screen stream update",{updateStream:false,roomID})
+      };
+    })
+  }
+  else
+  {
+    setScreenSharingEnabled(false)
+    screenStreamComponent.current.srcObject.getVideoTracks()[0].stop()
+    socketRef.current.emit("screen stream update",{updateStream:false,roomID})
+  }
+  }
+  
+  
+  
   const sendMessage = (sendMessage) => {
-    const payload = { name, message:sendMessage,senderId:socketRef.current.id,roomID };
+    const payload = { name, message: sendMessage, senderId: socketRef.current.id, roomID };
     socketRef.current.emit("send message", payload);
     chatsRef.current = [...chatsRef.current, { name: "You", message: payload.message }]
     const chatsUpdated = chatsRef.current;
     setChats(chatsUpdated)
-    
+
   }
-  useEffect(() => {
-    console.log("Chats",chats)
-  })
+
+
+
+
   function createStream() {
     MediaInit({ camera, mic, hostRef, setStream }).then((stream) => {
-
+      setStream(stream);
       hostRef.current.srcObject = stream;
-
+      screenStream.current = stream.clone();
+      screenStream.current.getTracks().forEach(function (track) {
+        if (track.kind === "audio") {
+          track.enabled = false;
+        }
+        if (track.kind === "video") {
+          track.enabled = false;
+        }
+      }
+      )
       {
         hostRef.current.srcObject.getTracks().forEach(function (track) {
           if (track.kind === "audio") {
@@ -179,6 +244,23 @@ const Meet = (props) => {
           });
         });
         setPeers(peers);
+        const peersForScreenStream = [];
+        users.forEach((userID) => {
+          const peer = createPeerForScreenShare(userID.id, socketRef.current.id, screenStream.current);
+          screenSharesRef.current.push({
+            peerID: userID.id+"-screen-share",
+            peer,
+            options: userID.options,
+            name: userID.name
+          });
+          peersForScreenStream.push({
+            peerID: userID.id+"-screen-share",
+            peer,
+            options: userID.options,
+            name: userID.name
+          });
+        });
+        setScreenShares(peersForScreenStream);
       });
       socketRef.current.on("user joined", (payload) => {
         console.log("User Joined data", payload)
@@ -189,10 +271,6 @@ const Meet = (props) => {
           options: payload.options,
           name: payload.name
         });
-        // peers.push({
-        //   peerID: payload.callerID,
-        //   peer
-        // })
         const peerUpdate = peersRef.current.filter((p) => p.peerID !== payload.callerID);
         peerUpdate.push({
           peerID: payload.callerID,
@@ -209,15 +287,9 @@ const Meet = (props) => {
         const index = peersRef.current.findIndex((p) => p.peerID === id);
 
         if (index != -1) {
-          if (peersRef[index]) {
-            peersRef[index].peer.destroy();
+          if (peersRef.current[index]) {
+            peersRef.current[index].peer.destroy();
           }
-          // var videoBox = document.getElementById(id + "-video_on")
-          // var videoOffBox = document.getElementById(id + "-video_off")
-          // if(videoBox)
-          // videoBox.parentNode.removeChild(videoBox);
-          // if(videoOffBox)
-          // videoOffBox.parentNode.removeChild(videoOffBox);
         }
         const peers = peersRef.current.filter((p) => p.peerID !== id);
         peersRef.current = peers;
@@ -235,7 +307,59 @@ const Meet = (props) => {
       socketRef.current.on("change", (payload) => {
         setUserUpdate({ id: payload.id, video: payload.video, audio: payload.audio });
       });
-    });
+
+      socketRef.current.on("user added screen stream", (payload) => {
+        console.log("User added screen stream", payload)
+        const peer = addPeerForScreenShare(payload.signal, payload.callerID, screenStream.current);
+        screenSharesRef.current.push({
+          peerID: payload.callerID+"-screen-share",
+          peer,
+        });
+        const peerUpdate = screenSharesRef.current.filter((p) => p.peerID !== payload.callerID+"-screen-share");
+        peerUpdate.push({
+          peerID: payload.callerID+"-screen-share",
+          peer,
+        })
+        setScreenShares(peerUpdate)
+      });
+
+      socketRef.current.on("user left screen stream", (id) => {
+        console.log("User Left screen stream", id);
+        const index = screenSharesRef.current.findIndex((p) => p.peerID === id);
+
+        if (index != -1) {
+          if (screenSharesRef.current[index]) {
+            screenSharesRef.current[index].peer.destroy();
+          }
+        }
+        const peers = screenSharesRef.current.filter((p) => p.peerID !== id);
+        screenSharesRef.current = peers;
+
+        setScreenShares(peers);
+      });
+
+      socketRef.current.on("receiving returned screen stream", (payload) => {
+        console.log("Receiving signal", payload)
+        const item = screenSharesRef.current.find((p) => p.peerID === payload.id);
+        item.peer.signal(payload.signal);
+      });
+
+      socketRef.current.on("screen share update",payload => {
+        if(payload.updateStream)
+        {
+          setScreenSharingEnabled(true)
+        const peer = userScreenStreams.current.find((peer)=>peer.peerID==payload.id+"-screen-share");
+        screenStreamComponent.current.srcObject = peer.stream
+        }
+        else{
+          setScreenSharingEnabled(false)
+        }
+      })
+
+
+    }).catch(err => {
+      console.log(err)
+    })
   }
 
 
@@ -244,7 +368,8 @@ const Meet = (props) => {
     const peer = new Peer({
       initiator: true,
       trickle: false,
-      stream,
+      stream
+     
     });
 
     peer.on("signal", (signal) => {
@@ -265,7 +390,7 @@ const Meet = (props) => {
     const peer = new Peer({
       initiator: false,
       trickle: false,
-      stream,
+      stream
     });
 
     peer.on("signal", (signal) => {
@@ -276,6 +401,45 @@ const Meet = (props) => {
 
     return peer;
   }
+
+  function createPeerForScreenShare(userToSignal, callerID, stream) {
+    const peer = new Peer({
+      initiator: true,
+      trickle: false,
+      stream
+     
+    });
+
+    peer.on("signal", (signal) => {
+      socketRef.current.emit("sending screen stream", {
+        userToSignal,
+        callerID,
+        signal,
+
+      });
+    });
+
+
+    return peer;
+  }
+
+  function addPeerForScreenShare(incomingSignal, callerID, stream) {
+    const peer = new Peer({
+      initiator: false,
+      trickle: false,
+      stream
+    });
+
+    peer.on("signal", (signal) => {
+      socketRef.current.emit("returning screen stream", { signal, callerID });
+    });
+
+    peer.signal(incomingSignal);
+
+    return peer;
+  }
+
+
   const ToggleState = (kind, state, setState) => {
     if (hostRef.current.srcObject && hostRef.current && hostRef) {
       hostRef.current.srcObject.getTracks().forEach(function (track) {
@@ -295,11 +459,17 @@ const Meet = (props) => {
     }
   }
   useEffect(() => {
-    console.log("Peers", peers)
-    console.log("Peers", peersRef.current)
+    console.log("Screen Shares",screenShares)
+    console.log("Screen Shares Ref",screenSharesRef.current)
+    screenSharesRef.current.forEach((peer)=>{
+      peer.peer.on("stream",(stream)=>{
+       userScreenStreams.current.push({peerID:peer.peerID, stream})
+      })
+    })
 
-  }, [peers, peersRef])
+  },[screenShares,screenSharesRef])
   useEffect(() => {
+
     console.log("Update", userUpdate);
     if (userUpdate) {
       if (userUpdate.video) {
@@ -389,15 +559,40 @@ const Meet = (props) => {
 
 
       <div className="meet-outer-layout">
-        <div className="members-with-config">
         <div className="meet-icons">
-            <img src={MicrosoftTeams} className="meet-teams-logo"/>
-            <Icon 
-            icon={bxsMessageAltDetail} 
-            className="chat-opener"
-            onClick={()=>{setOpenChat(!openChat)}}
-            />
+          <img src={MicrosoftTeams}
+            className="meet-teams-logo"
+            onClick={() => { window.location = "/" }} />
+          <div className="meet-top-option-box">
+            <Icon icon={shareScreenStart28Filled}
+              onClick={screenShare}
+              className="screen-share" />
+            <div className="chat-opener-wrapper">
+              <Icon
+                icon={bxsMessageAltDetail}
+                className="chat-opener"
+                onClick={() => {
+                  setOpenChat(!openChat);
+                  setChatBadge(false)
+                  chatOpenedRef.current = false
+                }}
+              />
+              {
+                chatBadge ?
+                  <div className="chat-badge">
+
+                  </div> : null
+              }
             </div>
+          </div>
+        </div>
+      <div className="meet_And_screen_share">
+      {screenSharingEnabled?
+            <div className="screen-share-box">
+              <video ref={screenStreamComponent} muted={true} playsInline id="share-screen-user" autoPlay/>
+            </div>:null
+            }
+        <div className="members-with-config" style={{width:screenSharingEnabled?'30%':'100%'}}>
           <div className="members-row">
             <UserVideo hostRef={hostRef} muted={true} style={style} />
             {camera
@@ -408,7 +603,7 @@ const Meet = (props) => {
             }
             {
               peers.map(peer => {
-                return <CreateRef peer={peer} style={style} />
+                return <CreateRef peer={peer} style={style}/>
               })
             }
           </div>
@@ -434,10 +629,10 @@ const Meet = (props) => {
 
                   }} />
             }
-            <Icon 
-            className="meet-controllers" 
-            icon={phoneOff}
-            onClick={disconnectMeet}
+            <Icon
+              className="meet-controllers"
+              icon={phoneOff}
+              onClick={disconnectMeet}
             />
 
             {
@@ -461,8 +656,11 @@ const Meet = (props) => {
             }
           </div>
         </div>
-      <Chats chats={chats} sendMessage={sendMessage} openChat={openChat} setOpenChat={setOpenChat}/>
+        
+
       </div>
+      </div>
+      <Chats chats={chats} sendMessage={sendMessage} openChat={openChat} setOpenChat={setOpenChat} />
     </div>
   )
 }
@@ -473,7 +671,9 @@ const mapStateToProps = state => {
     name: state.userDetails.name,
     mic: state.userDetails.mic,
     camera: state.userDetails.camera,
-    stream: state.userDetails.stream
+    stream: state.userDetails.stream,
+    videoDevices: state.userDetails.videoDevices,
+    audioDevices: state.userDetails.audioDevices
   }
 }
 
@@ -510,6 +710,18 @@ const mapDispatchToProps = dispatch => {
       dispatch({
         type: 'SET_STREAM',
         stream: data
+      })
+    },
+    setVideoDevices: data => {
+      dispatch({
+        type: 'SET_VIDEO_DEVICES',
+        videoDevices: data
+      })
+    },
+    setAudioDevices: data => {
+      dispatch({
+        type: 'SET_AUDIO_DEVICES',
+        audioDevices: data
       })
     }
   }

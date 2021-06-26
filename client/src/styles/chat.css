@@ -7,6 +7,7 @@
     display: flex;
     flex-direction: column;
     right: 0;
+    z-index: 2;
     /* animation:  1s ease-in-out forwards; */
 }
 @keyframes slide-right{
@@ -73,15 +74,27 @@
     align-self: center;
     
 }
+.chat-opener-wrapper{
+
+}
 .chat-opener{
     color: #10a19f;
     width: 40px;
     height:40px;
-    margin: 20px;
+
 }
 .chat-opener:hover
 {
     cursor: pointer;
+}
+.chat-badge{
+    position:absolute;
+    right: 15px;
+    top: 15px;
+    width:15px;
+    height: 15px;
+    border-radius:50%;
+    background-color:#65d4d3;
 }
 @media screen and (max-width:660px)
 {

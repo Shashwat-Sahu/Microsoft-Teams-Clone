@@ -5,7 +5,9 @@ var initState = {
     email: '',
     mic:false,
     camera:false,
-    stream:null
+    stream:null,
+    videoDevices:[],
+    audioDevices:[]
 }
 
 const userDetailsReducer = (state = initState, action) => {
@@ -37,6 +39,18 @@ const userDetailsReducer = (state = initState, action) => {
         return {
             ...state,
             stream: action.stream
+        }
+    }
+    if (action.type === 'SET_VIDEO_DEVICES') {
+        return {
+            ...state,
+            videoDevices: action.videoDevices
+        }
+    }
+    if (action.type === 'SET_AUDIO_DEVICES') {
+        return {
+            ...state,
+            audioDevices: action.audioDevices
         }
     }
     return state

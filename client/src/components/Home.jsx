@@ -19,7 +19,20 @@ import { v1 as uuid } from "uuid";
 
 
 const Home = (props) => {
-    const { mic, setMic, camera, setCamera, setStream, stream, name,setName,email,setEmail } = props;
+    const { 
+        mic,
+        setMic,
+        camera,
+        setCamera, 
+        setStream, 
+        stream, 
+        name,
+        setName,
+        email,
+        setEmail,
+        setAudioDevices,
+        setVideoDevices 
+      } = props;
     const history = useHistory();
     const hostRef = useRef();
     const home_video_style = {
@@ -30,7 +43,7 @@ const Home = (props) => {
         display: camera ? "block" : "none"
     }
     useEffect(() => {
-        MediaInit({ camera, mic, hostRef, setStream })
+        MediaInit({ camera, mic, hostRef, setStream,setAudioDevices,setVideoDevices })
 
     }, [mic, camera])
 
@@ -126,53 +139,67 @@ const Home = (props) => {
 }
 
 const mapStateToProps = state => {
-    return {
-      email: state.userDetails.email,
-      name: state.userDetails.name,
-      mic: state.userDetails.mic,
-      camera: state.userDetails.camera,
-      stream: state.userDetails.stream
+  return {
+    email: state.userDetails.email,
+    name: state.userDetails.name,
+    mic: state.userDetails.mic,
+    camera: state.userDetails.camera,
+    stream: state.userDetails.stream,
+    videoDevices: state.userDetails.videoDevices,
+    audioDevices: state.userDetails.audioDevices
+  }
+}
+
+const mapDispatchToProps = dispatch => {
+  return {
+
+    setEmail: data => {
+      dispatch({
+        type: 'SET_EMAIL',
+        email: data,
+      })
+    },
+    setName: data => {
+      dispatch({
+        type: 'SET_NAME',
+        name: data
+      })
+    },
+    setMic: data => {
+      dispatch({
+        type: 'SET_MIC',
+        mic: data
+      })
+    }
+    ,
+    setCamera: data => {
+      dispatch({
+        type: 'SET_CAMERA',
+        camera: data
+      })
+    }
+    ,
+    setStream: data => {
+      dispatch({
+        type: 'SET_STREAM',
+        stream: data
+      })
+    },
+    setVideoDevices: data => {
+      dispatch({
+        type: 'SET_VIDEO_DEVICES',
+        videoDevices: data
+      })
+    },
+    setAudioDevices: data => {
+      dispatch({
+        type: 'SET_AUDIO_DEVICES',
+        audioDevices: data
+      })
     }
   }
-  
-  const mapDispatchToProps = dispatch => {
-    return {
-      
-      setEmail: data => {
-        dispatch({
-          type: 'SET_EMAIL',
-          email: data,
-        })
-      },
-      setName: data => {
-        dispatch({
-          type: 'SET_NAME',
-          name: data
-        })
-      },
-      setMic: data => {
-        dispatch({
-          type: 'SET_MIC',
-          mic: data
-        })
-      }
-      ,
-      setCamera: data => {
-        dispatch({
-          type: 'SET_CAMERA',
-          camera: data
-        })
-      }
-      ,
-      setStream: data => {
-        dispatch({
-          type: 'SET_STREAM',
-          stream: data
-        })
-      }
-    }
-  }
-  
-  
-  
-  export default connect(mapStateToProps, mapDispatchToProps)(Home)
+}
+
+
+
+export default connect(mapStateToProps, mapDispatchToProps)(Home)
