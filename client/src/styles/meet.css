@@ -235,11 +235,8 @@
         position:relative;
     }
     .screen-share-box{
-        width:70%;
-        position:fixed;
+        width:100%;
         height: auto;
-        bottom :0;
-        right: 0;   
         z-index: 1;     
     }
 }

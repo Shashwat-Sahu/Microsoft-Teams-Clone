@@ -17,11 +17,13 @@ const users = {};
 
 const socketToRoom = {};
 
+const screenShareInRoom ={};
+
 io.on('connection', socket => {
     socket.on("join room", ({roomID,options,name}) => {
         if (users[roomID]) {
             const length = users[roomID].length;
-            if (length === 10) {
+            if (length === 15) {
                 socket.emit("room full");
                 return;
             }
@@ -82,11 +84,25 @@ io.on('connection', socket => {
     });
 
     socket.on("screen stream update",(payload)=>{
+
+        if(payload.updateStream)
+        {
+            screenShareInRoom[payload.roomID] = socket.id;
+        }
+        else
+        {
+            screenShareInRoom[payload.roomID] = null;
+        }
         users[payload.roomID].forEach(user=>{
             if(socket.id!==user.id)
             io.to(user.id).emit('screen share update',{updateStream:payload.updateStream,id:socket.id});
         })
 
+    })
+    socket.on("screen streaming running for new user",(payload)=>{
+        console.log(screenShareInRoom)
+        if(screenShareInRoom[payload.roomID])
+        io.to(socket.id).emit('screen share update',{updateStream:true,id:screenShareInRoom[payload.roomID]})
     })
 
 });

@@ -1,31 +1,4 @@
 
-.chat-section{
-    width: 20%;
-    background-color:#ffffff ;
-    height:100%;
-    position: absolute;
-    display: flex;
-    flex-direction: column;
-    right: 0;
-    z-index: 2;
-    /* animation:  1s ease-in-out forwards; */
-}
-@keyframes slide-right{
-    0%{
-        right: -100%;
-    }
-    100%{
-        right: 0;
-    }
-}
-@keyframes slide-left{
-    0%{
-        right: 0;
-    }
-    100%{
-       right: -100%;
-    }
-}
 .chat-header{
     font-family: Ubuntu;
     color: #fff;
@@ -33,7 +6,7 @@
     margin: 0;
     padding: 10px;
     display: flex;
-    flex-direction: row;
+    flex-direction: row-reverse;
     justify-content: space-between;
 }
 
@@ -42,40 +15,47 @@
     overflow: auto;
 }
 .chat-wrapper{
-    margin: 10px;
+    margin: 5px;
     /* background-color: #C4BCBC; */
-    border: 1px solid #C4BCBC;
+    border: 1px solid #757373;
     border-radius: 12px;
-    padding: 10px;
+    padding: 5px;
+    width:80%;
+    direction: ltr;
+    align-self: flex-start;
+}
+.chat-wrapper-user{
+    align-self: flex-end;
 }
 .chat-member-name{
     font-weight: 700;
     color:#086d6b;
+    text-align: left;
 }
 .chat-message{
-    color: #666;
-    text-align: justify;
+    color: rgb(255, 255, 255);
+    text-align: left;
 }
-.chat-bottom-options{
-    margin-top: 10px;
-    bottom:10px;
+.chat-pro-sidebar-footer{
     display: flex;
-    flex-direction: row;
-    justify-content: space-evenly;
-    place-items: center;
-    width: 100%;
+    flex-direction: row-reverse;
+    padding: 10px;
+    justify-content:space-evenly;
+    
 }
 .chatEntry{
     outline:none;
     border:none;
-    border-bottom: 1px solid #888;
-    width: 80%;
-    margin:10px;
-    align-self: center;
-    
+    background-color: transparent;
+    text-align: left;
+    color: white;
 }
-.chat-opener-wrapper{
-
+.chat-pro-sidebar-content
+{
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+    direction: ltr;
 }
 .chat-opener{
     color: #10a19f;
@@ -96,9 +76,18 @@
     border-radius:50%;
     background-color:#65d4d3;
 }
+.chat-pro-sidebar{
+    text-align:left!important;
+}
 @media screen and (max-width:660px)
 {
     .chat-section{
         width:100%;
+    }
+    .chat-pro-sidebar{
+        position: absolute !important;
+        right: 0 !important;
+        text-align:left!important;
+        
     }
 }
