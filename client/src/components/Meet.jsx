@@ -12,6 +12,7 @@ import bxsMessageAltDetail from '@iconify/icons-bx/bxs-message-alt-detail';
 import phoneOff from '@iconify/icons-carbon/phone-off';
 import MicrosoftTeams from "../assets/microsoft-teams.svg";
 import shareScreenStart28Filled from '@iconify/icons-fluent/share-screen-start-28-filled';
+import shareScreenStop20Filled from '@iconify/icons-fluent/share-screen-stop-20-filled';
 import Chats from "./Chats";
 import { connect } from 'react-redux';
 import "../styles/meet.css"
@@ -24,12 +25,8 @@ import 'react-toastify/dist/ReactToastify.css';
 
 
 const CreateRef = ({ peer, style, options }) => {
-
-
   const clientRef = useRef();
-
   var optionUser = peer.options ? peer.options : { video: false, audio: false };
-
   if (options)
     optionUser = options;
   useEffect(() => {
@@ -39,7 +36,6 @@ const CreateRef = ({ peer, style, options }) => {
     })
     peer.peer.on("track", (track, stream) => {
     })
-
   }, [])
 
   return <>
@@ -47,8 +43,8 @@ const CreateRef = ({ peer, style, options }) => {
       hostRef={clientRef}
       muted={false}
       style={{ ...style, display: optionUser.video ? "block" : "none" }}
-      id={peer.peerID + "-video_on"} />
-
+      id={peer.peerID + "-video_on"} 
+    />
     <div
       className="camera-off-member"
       style={{ ...style, display: !optionUser.video ? "flex" : "none" }}
@@ -62,14 +58,26 @@ const CreateRef = ({ peer, style, options }) => {
 
 const Meet = (props) => {
 
-  const { camera, mic, setMic, setCamera, stream, setStream, name, email, setName, setEmail, setVideoDevices, setAudioDevices } = props;
+  const { 
+    camera, 
+    mic, 
+    setMic, 
+    setCamera, 
+    stream, 
+    setStream, 
+    name, 
+    email, 
+    setName, 
+    setEmail, 
+    setVideoDevices, 
+    setAudioDevices } = props;
+    
   const hostRef = useRef()
   const [peers, setPeers] = useState([]);
   const [userUpdate, setUserUpdate] = useState();
   // Modal to ask Name from user (optional)
   const [modalIsOpen, setIsOpen] = useState(name == "Anonymous" ? true : false)
   const [chatBadge, setChatBadge] = useState(false)
-
   const socketRef = useRef();
   const peersRef = useRef([]);
   const chatsRef = useRef([]);
@@ -87,7 +95,7 @@ const Meet = (props) => {
   const history = useHistory()
   const [openChat, setOpenChat] = useState(false);
   const [chats, setChats] = useState([])
-  const [screenSharingEnabled, setScreenSharingEnabled] = useState(false)
+  const [screenSharingEnabled, setScreenSharingEnabled] = useState({enabled:false,presenter:null})
   const screenSharingEnabledRef = useRef(false);
 
   const customStylesModal = {
@@ -154,20 +162,19 @@ const Meet = (props) => {
       chatsRef.current = [...chatsRef.current, { name: message.name, message: message.message }];
       const chatsUpdated = chatsRef.current;
       setChats(chatsUpdated)
-
     })
   }
 
 
 
   const screenShare = () => {
-    if (!screenSharingEnabled) {
-      navigator.mediaDevices.getDisplayMedia({ video: true, audio: true }).then(screenStreamUpdate => {
-        setScreenSharingEnabled(true)
+    if (!screenSharingEnabled.enabled) {
+      navigator.mediaDevices.getDisplayMedia({ video: true, audio: true }).then(screenStreamUpdate => 
+      {
+        setScreenSharingEnabled({enabled:true,presenter:socketRef.current.id})
         screenSharingEnabledRef.current = true
         screenStreamComponent.current.srcObject = screenStreamUpdate
-        console.log(screenStreamComponent.current.muted)
-        socketRef.current.emit("screen stream update", { updateStream: true, roomID })
+        socketRef.current.emit("screen stream update", { updateStream: true, roomID ,name})
         screenSharesRef.current.forEach((screenRef) => {
           if (screenStreamUpdate.getTracks()[1]) {
             screenRef.peer.replaceTrack(screenStream.current.getTracks()[1], screenStreamUpdate.getTracks()[1], screenStream.current)
@@ -178,28 +185,27 @@ const Meet = (props) => {
           }
         })
         screenStreamUpdate.getVideoTracks()[0].onended = function () {
-          setScreenSharingEnabled(false)
+          setScreenSharingEnabled({enabled:false,presenter:null})
           screenSharingEnabledRef.current = false
           if (screenStreamUpdate.getAudioTracks()[0])
             screenStreamUpdate.getAudioTracks()[0].stop();
-          socketRef.current.emit("screen stream update", { updateStream: false, roomID })
+          socketRef.current.emit("screen stream update", { updateStream: false, roomID ,name})
         };
       })
     }
     else {
-      setScreenSharingEnabled(false)
+      setScreenSharingEnabled({enabled:false,presenter:null})
       screenSharingEnabledRef.current = false
       if (screenStreamComponent.current.srcObject.getAudioTracks()[0])
         screenStreamComponent.current.srcObject.getAudioTracks()[0].stop();
       screenStreamComponent.current.srcObject.getVideoTracks()[0].stop()
 
-      socketRef.current.emit("screen stream update", { updateStream: false, roomID })
+      socketRef.current.emit("screen stream update", { updateStream: false, roomID,name})
     }
   }
 
 
   const enableScreenSharingForNewUser = (peer) => {
-    console.log("New peer for screen share dynamic", peer)
     if (screenStreamComponent.current.srcObject.getAudioTracks()[0]) {
       peer.replaceTrack(screenStream.current.getTracks()[1], screenStreamComponent.current.srcObject.getTracks()[1], screenStream.current)
       peer.replaceTrack(screenStream.current.getTracks()[0], screenStreamComponent.current.srcObject.getTracks()[0], screenStream.current)
@@ -331,7 +337,6 @@ const Meet = (props) => {
         }
         const peers = peersRef.current.filter((p) => p.peerID !== id);
         peersRef.current = peers;
-
         setPeers(peers);
         console.log("After User Left", peers)
       });
@@ -359,7 +364,7 @@ const Meet = (props) => {
           peer,
         })
         setScreenShares(peerUpdate)
-        if (screenSharingEnabledRef)
+        if (screenSharingEnabledRef.current)
           enableScreenSharingForNewUser(peer)
       });
 
@@ -385,16 +390,23 @@ const Meet = (props) => {
       });
 
       socketRef.current.on("screen share update", payload => {
-        console.log("stream update", payload)
         if (payload.updateStream) {
-          setScreenSharingEnabled(true)
+          setScreenSharingEnabled({enabled:true,presenter:payload.id})
           screenSharingEnabledRef.current = true
           const peer = userScreenStreams.current.find((peer) => peer.peerID == payload.id + "-screen-share");
-          screenStreamComponent.current.srcObject = peer.stream
+          screenStreamComponent.current.srcObject = peer.stream;
+          toast.dark(`${payload.name} started screen sharing`, {
+            position: "top-left",
+            hideProgressBar: false
+          })
         }
         else {
-          setScreenSharingEnabled(false)
+          setScreenSharingEnabled({enabled:false,presenter:null})
           screenSharingEnabledRef.current = false
+          toast.dark(`${payload.name} stopped screen sharing`, {
+            position: "top-left",
+            hideProgressBar: false
+          })
         }
       })
 
@@ -506,7 +518,7 @@ const Meet = (props) => {
       peer.peer.on("stream", (stream) => {
         userScreenStreams.current.push({ peerID: peer.peerID, stream })
         i++;
-        if (i == screenSharesRef.current.length && !screenSharingEnabled) {
+        if (i == screenSharesRef.current.length && !screenSharingEnabledRef.current) {
           socketRef.current.emit("screen streaming running for new user", { roomID })
         }
       })
@@ -608,11 +620,35 @@ const Meet = (props) => {
         <div className="meet-icons">
           <img src={MicrosoftTeams}
             className="meet-teams-logo"
-            onClick={() => { window.location = "/" }} />
+            onClick={() => 
+            { window.location = "/"
+            }} 
+          />
           <div className="meet-top-option-box">
-            <Icon icon={shareScreenStart28Filled}
+            {!screenSharingEnabled.enabled
+            ?<Icon icon={shareScreenStart28Filled}
               onClick={screenShare}
-              className="screen-share" />
+              className="screen-share" 
+            />:
+            <Icon icon={shareScreenStop20Filled}
+              onClick={
+                
+                socketRef.current&&screenSharingEnabled.presenter==socketRef.current.id
+                ?
+                screenShare
+                :
+                null
+              }
+              className={`screen-share ${socketRef.current&&screenSharingEnabled.presenter!=socketRef.current.id
+                ?
+                'screen-share-disabled'
+                :
+                null}`} 
+              style={{
+                color:'#ff0000'
+              }}
+            />
+            }
             <div className="chat-opener-wrapper">
               <Icon
                 icon={bxsMessageAltDetail}
@@ -634,11 +670,11 @@ const Meet = (props) => {
         </div>
         <div className="meet_And_screen_share">
 
-          <div className="screen-share-box" style={{ display: screenSharingEnabled ? 'flex' : 'none' }}>
+          <div className="screen-share-box" style={{ display: screenSharingEnabled.enabled ? 'flex' : 'none' }}>
             <video ref={screenStreamComponent} muted={false} playsInline id="share-screen-user" autoPlay />
           </div>
 
-          <div className="members-with-config" style={{ width: screenSharingEnabled ? '30%' : '100%' }}>
+          <div className="members-with-config" style={{ width: screenSharingEnabled.enabled ? '30%' : '100%' }}>
             <div className="members-row">
               <UserVideo hostRef={hostRef} muted={true} style={style} />
               {camera

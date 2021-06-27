@@ -95,6 +95,9 @@
     height: 50px;
     margin: 20px;
 }
+.screen-share-disabled:hover{
+    cursor:not-allowed;
+}
 .members-row{
     display: flex;
     flex-direction: row;
