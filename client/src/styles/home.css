@@ -30,8 +30,31 @@
     min-width: 300px;
     box-shadow: -5px -5px 4px #7ad6d3, 5px 5px 4px #11807C;
     border-radius: 27px;
-    z-index: 1;
+    z-index: 0;
     overflow: hidden;
+}
+#modal-home
+{
+    width: 400px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    background: linear-gradient(110.08deg, rgba(31, 59, 68, 0.4) 4.89%, rgba(31, 59, 68, 0.1) 93.4%)!important;
+    border-top: 1px solid rgba(255, 255, 255, 0.5)!important;
+    border-left: 1px solid rgba(255, 255, 255, 0.5)!important;
+    border-bottom: 1px solid rgba(4, 94, 97, 0.5)!important;
+    border-right: 1px solid rgba(4, 94, 97, 0.5)!important;
+    backdrop-filter: blur(20px)!important;
+    border-radius: 20px!important;
+    box-shadow: 0 0 20px rgb(43, 42, 42);
+    color: white;
+}
+#copy-to-clipboard-icon{
+    color:#0e8581;
+    font-size: 1.5em;
+}
+#copy-to-clipboard-icon:hover{
+    cursor: pointer;
 }
 .video{
     flex-grow: 3;
@@ -123,7 +146,7 @@
     border: 2px solid #C4BCBC;
     box-sizing: border-box;
     border-radius: 27px;
-    z-index: 1; 
+    z-index: 0; 
     position: relative;  
 }
 .avatar-home{
@@ -168,6 +191,9 @@
     width: 40%;
     font-family: "Ubuntu";
 }
+.home-entry-buttons:hover{
+    cursor: pointer;
+}
 @media screen and (max-width:660px){
     .container{
         display:flex;
@@ -209,5 +235,9 @@
         position: relative;
         bottom: auto;
         margin: 10px;
+    }
+    #modal-home
+    {
+        width: 80%;
     }
 }

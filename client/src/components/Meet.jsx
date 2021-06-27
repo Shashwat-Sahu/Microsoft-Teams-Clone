@@ -648,7 +648,7 @@ const Meet = (props) => {
                 </div>
               }
               {
-                peers.map(peer => {
+                peersRef.current.map(peer => {
                   return <CreateRef peer={peer} style={style} />
                 })
               }

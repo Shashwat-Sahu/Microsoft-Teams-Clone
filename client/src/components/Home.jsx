@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import {useHistory} from "react-router-dom"
+import { useHistory, Link } from "react-router-dom"
 import UserVideo from "./userWindow"
 import "../styles/home.css"
 import { Icon } from '@iconify/react';
@@ -8,134 +8,193 @@ import micIcon from '@iconify/icons-bi/mic';
 import cameraVideo from '@iconify/icons-bi/camera-video';
 import cameraVideoOff from '@iconify/icons-bi/camera-video-off';
 import cameraVideoOffFill from '@iconify/icons-bi/camera-video-off-fill';
+import documentCopy20Filled from '@iconify/icons-fluent/document-copy-20-filled';
 import Mountains_background from "../assets/mountains-home.png";
 import MicrosoftTeams from "../assets/microsoft-teams.svg";
 import Avatar from "../assets/avatar.png";
 import Group_Connect from "../assets/home-right-vector.png";
 import { Toggler, MediaInit } from "../utils/utilityFunctions"
-import {connect} from 'react-redux';
+import { connect } from 'react-redux';
 import { v1 as uuid } from "uuid";
-
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import Modal from 'react-modal';
+import {CopyToClipboard} from 'react-copy-to-clipboard';
 
 
 const Home = (props) => {
-    const { 
-        mic,
-        setMic,
-        camera,
-        setCamera, 
-        setStream, 
-        stream, 
-        name,
-        setName,
-        email,
-        setEmail,
-        setAudioDevices,
-        setVideoDevices 
-      } = props;
-    const history = useHistory();
-    const hostRef = useRef();
-    const home_video_style = {
-        width: "100%",
-        borderRadius: "27px 27px 0 0",
-        height: "100%",
-        objectFit: "contain",
-        display: camera ? "block" : "none"
+  const {
+    mic,
+    setMic,
+    camera,
+    setCamera,
+    setStream,
+    stream,
+    name,
+    setName,
+    email,
+    setEmail,
+    setAudioDevices,
+    setVideoDevices
+  } = props;
+  const history = useHistory();
+  const hostRef = useRef();
+  const link = useRef(uuid());
+  const home_video_style = {
+    width: "100%",
+    borderRadius: "27px 27px 0 0",
+    height: "100%",
+    objectFit: "contain",
+    display: camera ? "block" : "none"
+  }
+  const [modalIsOpen, setmodalIsOpen] = useState(false)
+
+  const customStylesModal = {
+    overlay: {
+      backgroundColor: 'rgba(0,0,0,0.7)'
+    },
+    content: {
+      top: '50%',
+      left: '50%',
+      right: 'auto',
+      bottom: 'auto',
+      marginRight: '-50%',
+      transform: 'translate(-50%, -50%)',
+      padding: '20px'
+    },
+  };
+
+
+  useEffect(() => {
+    MediaInit({ camera, mic, hostRef, setStream, setAudioDevices, setVideoDevices }).then((stream) => {
+      toast.info('Devices are working properly')
+    })
+      .catch(err => {
+        toast.error('Devices are not working properly')
+      })
+  }, [])
+  useEffect(() => {
+    if (stream) {
+      stream.getVideoTracks()[0].enabled = camera
+      stream.getAudioTracks()[0].enabled = mic
     }
-    useEffect(() => {
-        MediaInit({ camera, mic, hostRef, setStream,setAudioDevices,setVideoDevices })
 
-    }, [mic, camera])
+  }, [mic, camera])
 
-    const ToggleState = (state, setState) => {
-        Toggler(state, setState);
-    }
+  const ToggleState = (state, setState) => {
+    Toggler(state, setState);
+  }
 
-    return (
-        <div className="container">
-            <div className="home-side-left">
-                <img src={MicrosoftTeams} className="logo-home" alt="Microsoft Teams" />
-                <div className="video-box">
+  return (
+    <div className="container">
+      <Modal
+        isOpen={modalIsOpen}
+        onRequestClose={() => {
+          setmodalIsOpen(false)
+        }}
+        style={customStylesModal}
+        id="modal-home"
+        contentLabel="Name Modal"
+      >
+        <h3>Get your link</h3>
+        <div className="modal-content-home">
+          <Link to={`/teams/${link.current}`} style={{color:'white'}}>{window.location.href+"teams/"+link.current}</Link>
+          <CopyToClipboard text={window.location.href+"teams/"+link.current}
+          onCopy={()=>{
+            toast.dark('Link copied!')
+          }}>
+          <Icon icon={documentCopy20Filled} 
+          id="copy-to-clipboard-icon" />
+          </CopyToClipboard>
+        </div>
+      </Modal>
+      <div className="home-side-left">
+        <img src={MicrosoftTeams} className="logo-home" alt="Microsoft Teams" />
+        <div className="video-box">
 
-                    <div className="video">
-                        <UserVideo hostRef={hostRef} style={home_video_style} muted={true}/>
-                    </div>
+          <div className="video">
+            <UserVideo hostRef={hostRef} style={home_video_style} muted={true} />
+          </div>
 
-                    {!camera
-                        ?
-                        <div className="video-off-box">
-                            <Icon icon={cameraVideoOffFill}
-                                className="video-off"
-                            />
-                            <h3>Camera is Off</h3>
-                        </div>
-                        :
-                        null}
-                    <div className="footer-options-video">
-                        {
-                            mic
-                                ?
-                                <Icon icon={micIcon}
-                                    className="video-set-buttons"
-                                    onClick={() => { ToggleState(mic, setMic) }}
-                                />
-                                :
-                                <Icon icon={micMute}
-                                    className="video-set-buttons"
-                                    onClick={() => { ToggleState(mic, setMic) }}
-                                />
-                        }
-                        {
-                            camera
-                                ?
-                                <Icon icon={cameraVideo}
-                                    className="video-set-buttons"
-                                    onClick={() => { ToggleState(camera, setCamera) }}
-                                />
-                                :
-                                <Icon icon={cameraVideoOff}
-                                    className="video-set-buttons"
-                                    onClick={() => { ToggleState(camera, setCamera) }}
-                                />
-                        }
-                    </div>
-                </div>
-                <img src={Mountains_background} className="mountainBackground" alt="Mountains" />
+          {!camera
+            ?
+            <div className="video-off-box">
+              <Icon icon={cameraVideoOffFill}
+                className="video-off"
+              />
+              <h3>Camera is Off</h3>
             </div>
-            <div className="home-side-right">
-                <div className="entry-box">
-                    <img src={Avatar} className="avatar-home" alt="Avatar" />
-                    <input 
-                    type="email" 
-                    placeholder="Enter Email ID" 
-                    className="email-input" 
-                    onChange={(e)=>{setEmail(e.target.value)}}
-                    
-                    />
-                    <input 
-                    type="text" 
-                    placeholder="Enter Name" 
-                    className="name-input" 
-                    onChange={(e)=>{setName(e.target.value)}}
-                    
-                    />
-                    <div className="home-entry-options">
-                        <button 
-                        className="home-entry-buttons" 
-                        onClick={()=>{
-                          history.push(`/teams/${uuid()}`)
-                        }}
-                        >Join Now</button>
-                        <button 
-                        className="home-entry-buttons"
-                        >
-                          Generate Link
-                        </button>
-                    </div>
-                </div>
-                <img src={Group_Connect} className="home-bottom-vector" />
-            </div>
-        </div>)
+            :
+            null}
+          <div className="footer-options-video">
+            {
+              mic
+                ?
+                <Icon icon={micIcon}
+                  className="video-set-buttons"
+                  onClick={() => { ToggleState(mic, setMic) }}
+                />
+                :
+                <Icon icon={micMute}
+                  className="video-set-buttons"
+                  onClick={() => { ToggleState(mic, setMic) }}
+                />
+            }
+            {
+              camera
+                ?
+                <Icon icon={cameraVideo}
+                  className="video-set-buttons"
+                  onClick={() => { ToggleState(camera, setCamera) }}
+                />
+                :
+                <Icon icon={cameraVideoOff}
+                  className="video-set-buttons"
+                  onClick={() => { ToggleState(camera, setCamera) }}
+                />
+            }
+          </div>
+        </div>
+        <img src={Mountains_background} className="mountainBackground" alt="Mountains" />
+      </div>
+      <div className="home-side-right">
+        <div className="entry-box">
+          <img src={Avatar} className="avatar-home" alt="Avatar" />
+          <input
+            type="email"
+            placeholder="Enter Email ID"
+            className="email-input"
+            onChange={(e) => { setEmail(e.target.value) }}
+
+          />
+          <input
+            type="text"
+            placeholder="Enter Name"
+            className="name-input"
+            onChange={(e) => { setName(e.target.value) }}
+
+          />
+          <div className="home-entry-options">
+            <button
+              className="home-entry-buttons"
+              onClick={() => {
+                history.push(`/teams/${link.current}`)
+              }}
+            >Join Now</button>
+            <button
+              className="home-entry-buttons"
+              onClick={() => {
+                setmodalIsOpen(true)
+              }}
+            >
+              Generate Link
+            </button>
+          </div>
+        </div>
+        <img src={Group_Connect} className="home-bottom-vector" />
+      </div>
+      <ToastContainer />
+    </div>)
 }
 
 const mapStateToProps = state => {

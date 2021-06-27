@@ -54,8 +54,13 @@ io.on('connection', socket => {
             room = room.filter(user => user.id !== socket.id);
             users[roomID] = room;
         }
-        socket.broadcast.emit('user left',socket.id)
-        socket.broadcast.emit('user left screen stream',socket.id+"-screen-share")
+        users[roomID].forEach(user=>{
+            if(socket.id!==user.id){
+            io.to(user.id).emit('user left',socket.id)
+            io.to(user.id).emit('user left screen stream',socket.id+"-screen-share")
+            }
+        })
+
         
     });
 

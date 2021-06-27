@@ -5,10 +5,10 @@ const Toggler = (state,setState) =>{
 
 const MediaInit = async ({camera,mic,hostRef,setStream,setAudioDevices,setVideoDevices}) =>{
 
-    navigator.mediaDevices.enumerateDevices()
-    .then((devices) =>{
-        console.log(devices)
-    })
+    // navigator.mediaDevices.enumerateDevices()
+    // .then((devices) =>{
+    //     console.log(devices)
+    // })
         return await new Promise((resolve,reject) =>{
 
          navigator.mediaDevices.getUserMedia({
