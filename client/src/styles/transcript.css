@@ -1,0 +1,85 @@
+
+.transcript-header{
+    font-family: Ubuntu;
+    color: #fff;
+    background-color:#10a19f;
+    margin: 0;
+    padding: 10px;
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: space-between;
+}
+
+.transcript-outer-wrapper{
+    flex-grow: 2;
+    overflow: auto;
+}
+.transcript-wrapper{
+    margin: 5px;
+    /* background-color: #C4BCBC; */
+    border-radius: 12px;
+    padding: 5px;
+    width:80%;
+    direction: ltr;
+    align-self: flex-start;
+}
+.transcript-wrapper-user{
+    align-self: flex-end;
+}
+.transcript-member-name{
+    font-weight: 700;
+    color:#086d6b;
+    text-align: left;
+}
+.transcript-message{
+    color: rgb(255, 255, 255);
+    text-align: left;
+}
+.transcript-pro-sidebar-footer{
+    display: flex;
+    flex-direction: row-reverse;
+    padding: 10px;
+    justify-content:space-evenly;
+    
+}
+.transcript-pro-sidebar-content
+{
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+    direction: ltr;
+}
+.transcript-opener{
+    color: #10a19f;
+    width: 40px;
+    height:40px;
+
+}
+.transcript-opener:hover
+{
+    cursor: pointer;
+}
+.transcript-badge{
+    position:absolute;
+    right: 15px;
+    top: 15px;
+    width:15px;
+    height: 15px;
+    border-radius:50%;
+    background-color:#65d4d3;
+}
+.transcript-pro-sidebar{
+    text-align:left!important;
+}
+@media screen and (max-width:660px)
+{
+    .transcript-section{
+        width:100%;
+    }
+    .transcript-pro-sidebar{
+        position: absolute !important;
+        left: 0 !important;
+        text-align:left!important;
+        
+    }
+}

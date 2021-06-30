@@ -4,6 +4,7 @@ const UserWindow = ({hostRef,style,muted,id}) => {
 
     return (
             <video ref={hostRef} style={style} muted={muted} id={id} autoPlay playsInline/>
+            
         )
 }
 

@@ -4,6 +4,34 @@ const app = express();
 const server = http.createServer(app);
 const socket = require("socket.io");
 const cors = require("cors");
+const request = require('request');
+
+
+// const authOptions = {
+//   method: 'post',
+//   url: "https://api.symbl.ai/oauth2/token:generate",
+//   body: {
+//     type: "application",
+//     appId: "4b396a706c444e70726972486772396c656756357a6a63667034416f54474555",
+//     appSecret: "77556671304d516d623053654c626673624d4e526a4d684a42413154516f5a666c4d444b686e4e34725a6341585778723673555a325877576f73353967726661"
+//   },
+//   json: true
+// };
+
+// request(authOptions, (err, res, body) => {
+//   if (err) {
+//     console.error('error posting json: ', err);
+//     throw err
+//   }
+
+//   console.log(JSON.stringify(body, null, 2));
+// });
+
+
+
+
+
+
 app.use(cors)
 const io = socket(server, {
     cors: {
@@ -48,7 +76,7 @@ io.on('connection', socket => {
     socket.on('disconnectMeet', () => {
 
         const roomID = socketToRoom[socket.id];
-        delete socketToRoom[socket.id];
+        
         console.log(`User ${socket.id} left from room: ${roomID}`);
         let room = users[roomID];
         if (room) {
@@ -95,7 +123,7 @@ io.on('connection', socket => {
             screenShareInRoom[payload.roomID] = {id:socket.id,name:payload.name};
         }
         else {
-            delete screenShareInRoom[payload.roomID] 
+            screenShareInRoom[payload.roomID] = null
         }
         users[payload.roomID].forEach(user => {
             if (socket.id !== user.id)
@@ -117,6 +145,12 @@ io.on('connection', socket => {
                 id: screenShareInRoom[payload.roomID].id,
                 name: screenShareInRoom[payload.roomID].name 
             })
+    })
+    socket.on("transcript data send", (payload) => {
+        users[payload.roomID].forEach(user => {
+            if (socket.id !== user.id)
+                io.to(user.id).emit('receive transcript', payload)
+        })
     })
 
 });

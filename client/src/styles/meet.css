@@ -1,5 +1,6 @@
 *{
     font-family: ubuntu;
+    outline: none;
 }
 .meet-parent{
  
@@ -13,14 +14,16 @@
     overflow-x: hidden;
     position: relative;
 }
+.meet-teams-logo:hover{
+    cursor: pointer;
+}
 .meet-outer-layout{
     display: flex;
     flex-direction: column;
     width: 100%;
     height: 100%;
     position: relative;
-    /* background-image: url('https://images5.alphacoders.com/437/thumb-1920-437716.jpg');
-    background-size: cover; */
+    background-size: cover;
 }
 .members-with-config{
     display: flex;
@@ -51,7 +54,12 @@
     flex-direction: row;
     justify-content:space-between;
     margin: 20px;
-    width: 10%;
+    width: 20%;
+}
+.meet-top-option-box div,.meet-top-option-box svg
+{
+    width: 40px;
+    height:40px;
 }
 .screen-share{
     color: #10a19f;
@@ -127,8 +135,9 @@
     justify-content: center;
     place-items: center;
     box-shadow: 0 0 20px rgb(43, 42, 42);
+    position: relative;
 }
-.member-name{
+.member-name-initial{
     width:90px;
     height:90px;
     border-radius: 50%;
@@ -138,6 +147,14 @@
     color: #ffffff;
     font-size: 2rem;
     box-shadow:5px 5px 10px rgb(51, 50, 50),-1px -1px 5px #ffffff;
+}
+.member-name
+{
+    color:#fff;
+    position: absolute;
+    bottom: 5%;
+    right:5%;
+    text-shadow: 0px 0px 15px rgb(0, 0, 0);
 }
 
 .meet-options{
@@ -201,6 +218,45 @@
     justify-content: space-around;
     place-items: center;
 }
+.other-options{
+    position: relative;
+}
+.dropdown-meet{
+    list-style: none;
+    background-color: rgb(11, 153, 146);
+    position: absolute;
+    width: 200px;
+    z-index: 2;
+    left: -120px;
+    display: none;
+    top: 30px;
+}
+.dropdown-meet li{
+    padding: 10px;
+    color: #fff;
+    border-bottom: 1px solid #C4BCBC;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+}
+
+.dropdown-meet li:hover{
+    background-color: #0b5f4d;
+    cursor: pointer;
+}
+.dropdown-meet li:last-child
+{
+    border-bottom: none;
+}
+.background-switcher{
+    width: 30%!important;
+}
+.other-options:hover{
+    cursor: pointer;
+}
+.other-options:hover .dropdown-meet{
+    display: block;
+}
 @media screen and (max-width:660px) {
     .members-row{
         width: 100%;
@@ -230,7 +286,7 @@
         width: 70%;
     }
     .meet-top-option-box{
-        width:30%
+        width:50%
     }
     .meet_And_screen_share{
         flex-direction: column;
