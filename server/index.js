@@ -49,7 +49,7 @@ const screenShareInRoom = {};
 
 io.on('connection', socket => {
     socket.on("join room", ({ roomID, options, name }) => {
-        if (users[roomID]) {
+        if (users[roomID]&&users[roomID].length!=0) {
             const length = users[roomID].length;
             if (length === 15) {
                 socket.emit("room full");
@@ -83,6 +83,7 @@ io.on('connection', socket => {
             room = room.filter(user => user.id !== socket.id);
             users[roomID] = room;
         }
+        if(users[roomID])
         users[roomID].forEach(user => {
             if (socket.id !== user.id) {
                 io.to(user.id).emit('user left', socket.id)
@@ -101,6 +102,7 @@ io.on('connection', socket => {
         socket.broadcast.emit('change', payload)
     });
     socket.on("send message", (payload) => {
+        if(users[payload.roomID])
         users[payload.roomID].forEach(user => {
             if (socket.id !== user.id)
                 io.to(user.id).emit('receivedMessage', payload)
@@ -125,6 +127,7 @@ io.on('connection', socket => {
         else {
             screenShareInRoom[payload.roomID] = null
         }
+        if(users[payload.roomID])
         users[payload.roomID].forEach(user => {
             if (socket.id !== user.id)
                 io.to(user.id).emit('screen share update', 
@@ -147,6 +150,7 @@ io.on('connection', socket => {
             })
     })
     socket.on("transcript data send", (payload) => {
+        if(users[payload.roomID])
         users[payload.roomID].forEach(user => {
             if (socket.id !== user.id)
                 io.to(user.id).emit('receive transcript', payload)
