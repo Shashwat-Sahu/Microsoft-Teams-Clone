@@ -73,14 +73,20 @@ io.on('connection', socket => {
     });
 
 
-    socket.on('disconnectMeet', (name) => {
+    socket.on('disconnectMeet', (nameIncoming) => {
 
         const roomID = socketToRoom[socket.id];
-        
+        var name=''
         console.log(`User ${socket.id} left from room: ${roomID}`);
         let room = users[roomID];
         if (room) {
-            room = room.filter(user => user.id !== socket.id);
+            room = room.filter(user => 
+                {
+                    if(user.id !== socket.id)
+                return user
+                else
+                name = user.name
+            });
             users[roomID] = room;
         }
         if(users[roomID])
@@ -89,9 +95,18 @@ io.on('connection', socket => {
                 io.to(user.id).emit('user left', {id:socket.id,name})
                 io.to(user.id).emit('user left screen stream', socket.id + "-screen-share")
             }
+            if(screenShareInRoom[roomID]&&screenShareInRoom[roomID].id==socket.id)
+            {
+                if (socket.id !== user.id)
+                io.to(user.id).emit('screen share update', 
+                { 
+                    updateStream: false, 
+                    id: socket.id,
+                    name:name||nameIncoming
+                });
+            }
         })
-
-
+        
     });
 
     socket.on('change', (payload) => {
@@ -120,7 +135,7 @@ io.on('connection', socket => {
     });
 
     socket.on("screen stream update", (payload) => {
-
+        console.log(`User ${socket.id} started screen sharing in room: ${payload.roomID}`)
         if (payload.updateStream) {
             screenShareInRoom[payload.roomID] = {id:socket.id,name:payload.name};
         }

@@ -202,8 +202,8 @@ const Meet = (props) => {
 
   const startStream = () => {
     setIsOpen(false)
-    // socketRef.current = io.connect("https://microsoft-team-clone.herokuapp.com/");
-    socketRef.current = io.connect("http://localhost:8000");
+    socketRef.current = io.connect("https://microsoft-team-clone.herokuapp.com/");
+    // socketRef.current = io.connect("http://localhost:8000");
     createStream();
     startChat()
   }
@@ -566,6 +566,7 @@ const Meet = (props) => {
       });
 
       socketRef.current.on("screen share update", payload => {
+        console.log(payload)
         if (payload.updateStream) {
           setScreenSharingEnabled({ enabled: true, presenter: payload.id })
           screenSharingEnabledRef.current = true
