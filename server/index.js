@@ -73,7 +73,7 @@ io.on('connection', socket => {
     });
 
 
-    socket.on('disconnectMeet', () => {
+    socket.on('disconnectMeet', (name) => {
 
         const roomID = socketToRoom[socket.id];
         
@@ -86,7 +86,7 @@ io.on('connection', socket => {
         if(users[roomID])
         users[roomID].forEach(user => {
             if (socket.id !== user.id) {
-                io.to(user.id).emit('user left', socket.id)
+                io.to(user.id).emit('user left', {id:socket.id,name})
                 io.to(user.id).emit('user left screen stream', socket.id + "-screen-share")
             }
         })

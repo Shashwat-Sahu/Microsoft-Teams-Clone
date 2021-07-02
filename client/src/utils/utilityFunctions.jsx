@@ -18,7 +18,7 @@ const MediaInit = async ({camera,mic,hostRef,setStream,setAudioDevices,setVideoD
             if (hostRef && hostRef.current)    
             {
                 hostRef.current.srcObject = stream;
-                setStream(stream)
+                
                 resolve(stream);
             }
         }).catch(error=>{

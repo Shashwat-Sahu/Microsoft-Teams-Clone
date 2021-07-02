@@ -156,7 +156,17 @@
     right:5%;
     text-shadow: 0px 0px 15px rgb(0, 0, 0);
 }
-
+.user-video-box{
+    width: 80%;
+    max-width: 400px;
+    height: 200px;
+    box-sizing: border-box;
+    box-shadow: 0px 1px 24px -1px rgba(0, 0, 0, 0.5);
+    border-radius: 27px;
+    object-fit: cover;
+    margin: 20px;
+    position: relative;
+}
 .meet-options{
     display: flex;
     flex-direction:row;
@@ -297,5 +307,9 @@
         width:100%;
         height: auto;
         z-index: 1;     
+    }
+    .user-video-box{
+        width: 90%;
+
     }
 }

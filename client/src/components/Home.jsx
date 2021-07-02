@@ -67,6 +67,7 @@ const Home = (props) => {
 
   useEffect(() => {
     MediaInit({ camera, mic, hostRef, setStream, setAudioDevices, setVideoDevices }).then((stream) => {
+      setStream(stream)
       toast.info('Devices are working properly')
     })
       .catch(err => {

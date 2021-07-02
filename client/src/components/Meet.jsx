@@ -36,24 +36,31 @@ const CreateRef = ({ peer, style, options }) => {
   if (options)
     optionUser = options;
   useEffect(() => {
+    
     peer.peer.on("stream", (stream) => {
-
+      console.log("here")
+      if(clientRef&&clientRef.current)
       clientRef.current.srcObject = stream
+      peer.stream = stream
     })
-    peer.peer.on("track", (track, stream) => {
-    })
+  
   }, [])
 
-  return <>
+  
+  return peer.destroyed?null:<>
+  <div className="user-video-box" style={{display: optionUser.video ? "block" : "none"}} id={peer.peerID + "-video_on"}>
     <UserVideo
       hostRef={clientRef}
       muted={false}
-      style={{ ...style, display: optionUser.video ? "block" : "none" }}
-      id={peer.peerID + "-video_on"}
+      style={style }
     />
+    <div className="member-name">
+        {peer.name}
+      </div>
+    </div>
     <div
       className="camera-off-member"
-      style={{ ...style, display: !optionUser.video ? "flex" : "none" }}
+      style={{display: !optionUser.video ? "flex" : "none" }}
       id={peer.peerID + "-video_off"}>
       <div className="member-name-initial">{peer.name.slice(0, 1)}</div>
       <div className="member-name">
@@ -128,15 +135,15 @@ const Meet = (props) => {
   const roomID = props.match.params.teamId;
 
   const style = {
-    width: "80%",
-    maxWidth: "400px",
-    height: "200px",
-    display: camera ? "block" : "none",
-    boxSizing: "border-box",
-    boxShadow: "0px 1px 24px -1px rgba(0, 0, 0, 0.1)",
+    width: "100%",
+    // maxWidth: "400px",
+    height: "100%",
+    // display: camera ? "block" : "none",
+    // boxSizing: "border-box",
+    // boxShadow: "0px 1px 24px -1px rgba(0, 0, 0, 0.1)",
     borderRadius: "27px",
     objectFit: "cover",
-    margin: "20px"
+    // margin: "20px"
   }
 
   useEffect(() => {
@@ -183,7 +190,7 @@ const Meet = (props) => {
   });
 
   const disconnectMeet = () => {
-    socketRef.current.emit("disconnectMeet")
+    socketRef.current.emit("disconnectMeet",(name))
     // stopTranscripting()
     setTranscripts([])
     transcriptsRef.current = []
@@ -195,8 +202,8 @@ const Meet = (props) => {
 
   const startStream = () => {
     setIsOpen(false)
-    socketRef.current = io.connect("https://microsoft-team-clone.herokuapp.com/");
-    // socketRef.current = io.connect("http://localhost:8000");
+    // socketRef.current = io.connect("https://microsoft-team-clone.herokuapp.com/");
+    socketRef.current = io.connect("http://localhost:8000");
     createStream();
     startChat()
   }
@@ -425,7 +432,9 @@ const Meet = (props) => {
             peerID: userID.id,
             peer,
             options: userID.options,
-            name: userID.name
+            name: userID.name,
+            new:true,
+            destroyed:false
           });
           peers.push({
             peerID: userID.id,
@@ -467,14 +476,17 @@ const Meet = (props) => {
           peerID: payload.callerID,
           peer,
           options: payload.options,
-          name: payload.name
+          name: payload.name,
+          new:true,
+            destroyed:false
         });
         const peerUpdate = peersRef.current.filter((p) => p.peerID !== payload.callerID);
         peerUpdate.push({
           peerID: payload.callerID,
           peer,
           options: payload.options,
-          name: payload.name
+          name: payload.name,
+                      
         })
         toast.dark(`${payload.name} has joined`, {
           position: "top-left",
@@ -483,23 +495,26 @@ const Meet = (props) => {
         setPeers(peerUpdate)
       });
 
-      socketRef.current.on("user left", (id) => {
+      socketRef.current.on("user left", ({id,name}) => {
         console.log("User Left", id);
-        const index = peersRef.current.findIndex((p) => p.peerID === id);
-
-        if (index != -1) {
-          if (peersRef.current[index]) {
-            peersRef.current[index].peer.destroy();
-            toast.dark(`${peersRef.current[index].name} has left`, {
+        
+        peersRef.current.filter((p) =>{
+          if(p.peerID == id)
+          {
+          p.destroyed=true;
+          p.peer.destroy();
+            if(name==undefined)
+            toast.dark(`${p.name} has left`, {
               position: "top-left",
               hideProgressBar: false
             });
           }
-        }
-        const peers = peersRef.current.filter((p) => p.peerID !== id);
-        peersRef.current = peers;
-        setPeers(peers);
-        console.log("After User Left", peers)
+        });
+        if(name!=undefined)
+        toast.dark(`${name} has left`, {
+          position: "top-left",
+          hideProgressBar: false
+        });
       });
 
       socketRef.current.on("receiving returned signal", (payload) => {
@@ -666,7 +681,6 @@ const Meet = (props) => {
         if (track.kind === kind) {
 
           socketRef.current.emit("change", {
-
             id: socketRef.current.id,
             video: kind == "video" ? !camera : camera,
             audio: kind == "audio" ? !mic : mic,
@@ -874,9 +888,12 @@ const Meet = (props) => {
 
           <div className="members-with-config" style={{ width: screenSharingEnabled.enabled ? '30%' : '100%' }}>
             <div className="members-row">
-
+              <div className="user-video-box" style={{display:camera?'flex':'none'}}>
               <UserVideo hostRef={hostRef} muted={true} style={style} />
-
+              <div className="member-name">
+                    {name}
+                  </div>
+              </div>
               {camera
                 ? null :
                 <div className="camera-off-member">
@@ -890,7 +907,9 @@ const Meet = (props) => {
               }
               {
                 peersRef.current.map(peer => {
+                  
                   return <CreateRef peer={peer} style={style} />
+                 
                 })
               }
             </div>

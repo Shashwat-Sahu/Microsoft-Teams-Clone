@@ -10,7 +10,7 @@ server/.git
 
 # production
 /build
-
+./server/.git
 # misc
 .DS_Store
 .env.local
