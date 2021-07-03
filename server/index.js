@@ -1,11 +1,37 @@
 const express = require("express");
 const http = require("http");
 const app = express();
+// const cors = require("cors");
+
+app.use((req, res, next) => {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader(
+      "Access-Control-Allow-Methods",
+      "OPTIONS, GET, POST, PUT, PATCH, DELETE"
+    );
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    next();
+  });
+app.get("/", (req, res) => {
+    res.send("Live")
+});
+// app.use(cors)
+
+
 const server = http.createServer(app);
 const socket = require("socket.io");
-const cors = require("cors");
 const request = require('request');
 
+
+require('dotenv').config()
+require("./Modals/user")
+require("./Modals/screenStream")
+
+
+
+const mongoose = require('mongoose');
+const Room = mongoose.model('Room');
+const ScreenStream = mongoose.model('ScreenStream')
 
 // const authOptions = {
 //   method: 'post',
@@ -32,7 +58,7 @@ const request = require('request');
 
 
 
-app.use(cors)
+
 const io = socket(server, {
     cors: {
         origin: '*',
@@ -47,21 +73,47 @@ const socketToRoom = {};
 
 const screenShareInRoom = {};
 
+mongoose.connect(process.env.MONGO, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+})
+
+mongoose.connection.on('connected', () => {
+    console.log('Connected to MongoDB', process.env.MONGO);
+})
+
+mongoose.connection.on('error', (err) => {
+    console.log(err);
+})
+
+
 io.on('connection', socket => {
     socket.on("join room", ({ roomID, options, name }) => {
-        if (users[roomID]&&users[roomID].length!=0) {
-            const length = users[roomID].length;
-            if (length === 15) {
-                socket.emit("room full");
-                return;
+        Room.findOneAndUpdate({ roomID: roomID }, {
+            $push: {
+                roomUsers:
+                {
+                    id: socket.id,
+                    name,
+                    options
+                }
             }
-            users[roomID].push({ id: socket.id, options, name });
-        } else {
-            users[roomID] = [{ id: socket.id, options, name }];
-        }
-        socketToRoom[socket.id] = roomID;
-        const usersInThisRoom = users[roomID].filter(user => user.id !== socket.id);
-        socket.emit("all users", usersInThisRoom);
+        },
+            {
+                upsert: true,
+                returnOriginal: false
+            }
+        ).then(data => {
+
+            if (data == null) {
+                return socket.emit("all users", []);
+            }
+            else {
+                socketToRoom[socket.id] = roomID;
+                return socket.emit("all users", data.roomUsers);
+            }
+
+        })
     });
 
     socket.on("sending signal", payload => {
@@ -73,56 +125,105 @@ io.on('connection', socket => {
     });
 
 
-    socket.on('disconnectMeet', (nameIncoming) => {
+    socket.on('disconnectMeet', ({ name, roomID }) => {
 
-        const roomID = socketToRoom[socket.id];
-        var name=''
-        console.log(`User ${socket.id} left from room: ${roomID}`);
-        let room = users[roomID];
-        if (room) {
-            room = room.filter(user => 
+        Room.findOneAndUpdate({ roomID: roomID }, {
+            $pull: {
+                roomUsers:
                 {
-                    if(user.id !== socket.id)
-                return user
-                else
-                name = user.name
-            });
-            users[roomID] = room;
-        }
-        if(users[roomID])
-        users[roomID].forEach(user => {
-            if (socket.id !== user.id) {
-                io.to(user.id).emit('user left', {id:socket.id,name})
-                io.to(user.id).emit('user left screen stream', socket.id + "-screen-share")
+                    "id": socket.id
+                }
             }
-            if(screenShareInRoom[roomID]&&screenShareInRoom[roomID].id==socket.id)
+        },
             {
-                if (socket.id !== user.id)
-                io.to(user.id).emit('screen share update', 
-                { 
-                    updateStream: false, 
-                    id: socket.id,
-                    name:name||nameIncoming
-                });
+                returnOriginal: false
             }
+        ).then(room => {
+            console.log("After left", room)
+            console.log(`User ${socket.id} left from room: ${roomID}`);
+
+            if (room) {
+                room.roomUsers.forEach(user => {
+                    if (socket.id !== user.id) {
+                        io.to(user.id).emit('user left', { id: socket.id, name })
+                        io.to(user.id).emit('user left screen stream', socket.id + "-screen-share")
+                    }
+
+                })
+
+            }
+
+            if (room.roomUsers.length == 0 || (room.roomUsers.length == 1 && room.roomUsers[0].id == socket.id)) {
+                Room.findOneAndDelete({ roomID: roomID }).then(room => {
+                    console.log("deleted room", room)
+                })
+                ScreenStream.findOneAndDelete({ roomID: roomID }).then(screenStream => {
+                    console.log("deleted screen stream", screenStream)
+                })
+            }
+            ScreenStream.findOne({ roomID: roomID }).then(data => {
+                console.log(data)
+                console.log(socket.id)
+                if (data && data.screenShareInRoom.id == socket.id) {
+                    ScreenStream.findOneAndUpdate({ roomID: roomID }, {
+                        $set: {
+                            screenShareInRoom: {
+                                id: null,
+                                name: null
+                            }
+                        }
+                    }, {
+                        upsert: true
+                    }
+                    ).then(data => {
+                        console.log(data);
+                        Room.findOne({ roomID: roomID }).then(room => {
+                            console.log(room)
+                            if (room && room.roomUsers) {
+
+                                room.roomUsers.forEach(user => {
+                                    if (socket.id !== user.id)
+                                        io.to(user.id).emit('screen share update',
+                                            {
+                                                updateStream: false,
+                                                id: socket.id,
+                                                name: name
+                                            });
+                                })
+                            }
+                        })
+                    })
+                }
+            })
         })
-        
     });
 
     socket.on('change', (payload) => {
-
-        const index = users[socketToRoom[socket.id]].findIndex(user => user.id === socket.id)
-        users[socketToRoom[socket.id]][index].options = { video: payload.video, audio: payload.audio };
-
-        socket.broadcast.emit('change', payload)
+        Room.findOneAndUpdate({ roomID: payload.roomID, "roomUsers.id": socket.id }, {
+            $set: {
+                "roomUsers.$.options": {
+                    video: payload.video, audio: payload.audio
+                }
+            }
+        },
+            {
+                returnOriginal: false
+            }
+        ).then(data => {
+            console.log(data)
+            socket.broadcast.emit('change', payload)
+        })
     });
     socket.on("send message", (payload) => {
-        if(users[payload.roomID])
-        users[payload.roomID].forEach(user => {
-            if (socket.id !== user.id)
-                io.to(user.id).emit('receivedMessage', payload)
+        Room.findOne({ roomID: payload.roomID }).then(room => {
+            console.log(room)
+            if (room && room.roomUsers) {
+                room.roomUsers.forEach(user => {
+                    if (socket.id !== user.id)
+                        io.to(user.id).emit('receivedMessage', payload)
+                })
+            }
         })
-
     })
 
 
@@ -135,48 +236,68 @@ io.on('connection', socket => {
     });
 
     socket.on("screen stream update", (payload) => {
-        console.log(`User ${socket.id} started screen sharing in room: ${payload.roomID}`)
-        if (payload.updateStream) {
-            screenShareInRoom[payload.roomID] = {id:socket.id,name:payload.name};
+        console.log(`User ${socket.id} ${payload.updateStream ? 'started' : 'stopped'} screen sharing in room: ${payload.roomID}`)
+
+        ScreenStream.findOneAndUpdate({ roomID: payload.roomID }, {
+            $set: {
+                screenShareInRoom: {
+                    id: payload.updateStream ? socket.id : null,
+                    name: payload.updateStream ? payload.name : null
+                }
+            }
+        }, {
+            upsert: true
         }
-        else {
-            screenShareInRoom[payload.roomID] = null
-        }
-        if(users[payload.roomID])
-        users[payload.roomID].forEach(user => {
-            if (socket.id !== user.id)
-                io.to(user.id).emit('screen share update', 
-                { 
-                    updateStream: payload.updateStream, 
-                    id: socket.id, 
-                    name: payload.name 
-                });
+        ).then(data => {
+            console.log(data);
+            Room.findOne({ roomID: payload.roomID }).then(room => {
+                console.log(room)
+                if (room && room.roomUsers) {
+
+                    room.roomUsers.forEach(user => {
+                        if (socket.id !== user.id)
+                            io.to(user.id).emit('screen share update',
+                                {
+                                    updateStream: payload.updateStream,
+                                    id: socket.id,
+                                    name: payload.name
+                                });
+                    })
+                }
+            })
         })
 
     })
     socket.on("screen streaming running for new user", (payload) => {
-        console.log(screenShareInRoom)
-        if (screenShareInRoom[payload.roomID])
-            io.to(socket.id).emit('screen share update', 
-            { 
-                updateStream: true, 
-                id: screenShareInRoom[payload.roomID].id,
-                name: screenShareInRoom[payload.roomID].name 
-            })
+
+        ScreenStream.findOne({ roomID: payload.roomID }).then(data => {
+            console.log("new stream", data)
+            if (data.screenShareInRoom.id) {
+                io.to(socket.id).emit('screen share update',
+                    {
+                        updateStream: true,
+                        id: data.screenShareInRoom.id,
+                        name: data.screenShareInRoom.name
+                    })
+            }
+        })
     })
     socket.on("transcript data send", (payload) => {
-        if(users[payload.roomID])
-        users[payload.roomID].forEach(user => {
-            if (socket.id !== user.id)
-                io.to(user.id).emit('receive transcript', payload)
+        Room.findOne({ roomID: payload.roomID }).then(room => {
+            console.log(room)
+            if (room && room.roomUsers) {
+                room.roomUsers.forEach(user => {
+                    if (socket.id !== user.id)
+                        io.to(user.id).emit('receive transcript', payload)
+                })
+            }
         })
     })
 
 });
 
-app.get("/", (req, res) => {
-    res.send("Live")
-});
+
+
 const PORT = process.env.PORT || 8000;
 // if(process.env.PROD){
 //     app.use( express.static(__dirname + '/client/build'));

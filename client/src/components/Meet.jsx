@@ -27,7 +27,7 @@ import { useHistory } from 'react-router-dom'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Transcript from './Transcript'
-
+import {prodUrl as url} from "../Config/config.json"
 
 
 const CreateRef = ({ peer, style, options }) => {
@@ -183,14 +183,14 @@ const Meet = (props) => {
     }
   }, [userUpdate])
 
-  useBeforeunload((event) => {
+  window.onbeforeunload = function() { 
     if (socketRef && socketRef.current) {
-      socketRef.current.emit("disconnectMeet")
+      socketRef.current.emit("disconnectMeet",{name,roomID})
     }
-  });
+  }
 
   const disconnectMeet = () => {
-    socketRef.current.emit("disconnectMeet",(name))
+    socketRef.current.emit("disconnectMeet",{name,roomID})
     // stopTranscripting()
     setTranscripts([])
     transcriptsRef.current = []
@@ -202,8 +202,7 @@ const Meet = (props) => {
 
   const startStream = () => {
     setIsOpen(false)
-    socketRef.current = io.connect("https://microsoft-team-clone.herokuapp.com/");
-    // socketRef.current = io.connect("http://localhost:8000");
+    socketRef.current = io.connect(url);
     createStream();
     startChat()
   }
@@ -685,6 +684,7 @@ const Meet = (props) => {
             id: socketRef.current.id,
             video: kind == "video" ? !camera : camera,
             audio: kind == "audio" ? !mic : mic,
+            roomID
           });
           track.enabled = kind == "audio" ? !mic : !camera;
         }

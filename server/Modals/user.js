@@ -19,5 +19,10 @@ const roomSchema = new mongoose.Schema({
 ]
 
 })
-
-mongoose.model("room",roomSchema);
+roomSchema.path('roomUsers').validate(function (value) {
+    console.log(value.length)
+    if (value.length > 10) {
+      throw new Error("Atmost 10 people allowed!");
+    }
+  })
+mongoose.model("Room",roomSchema);
