@@ -27,7 +27,7 @@ import { useHistory } from 'react-router-dom'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Transcript from './Transcript'
-import {prodUrl as url} from "../Config/config.json"
+import { prodUrl as url } from "../Config/config.json"
 
 
 const CreateRef = ({ peer, style, options }) => {
@@ -36,31 +36,31 @@ const CreateRef = ({ peer, style, options }) => {
   if (options)
     optionUser = options;
   useEffect(() => {
-    
+
     peer.peer.on("stream", (stream) => {
       console.log("here")
-      if(clientRef&&clientRef.current)
-      clientRef.current.srcObject = stream
+      if (clientRef && clientRef.current)
+        clientRef.current.srcObject = stream
       peer.stream = stream
     })
-  
+
   }, [])
 
-  
-  return peer.destroyed?null:<>
-  <div className="user-video-box" style={{display: optionUser.video ? "block" : "none"}} id={peer.peerID + "-video_on"}>
-    <UserVideo
-      hostRef={clientRef}
-      muted={false}
-      style={style }
-    />
-    <div className="member-name">
+
+  return peer.destroyed ? null : <>
+    <div className="user-video-box" style={{ display: optionUser.video ? "block" : "none" }} id={peer.peerID + "-video_on"}>
+      <UserVideo
+        hostRef={clientRef}
+        muted={false}
+        style={style}
+      />
+      <div className="member-name">
         {peer.name}
       </div>
     </div>
     <div
       className="camera-off-member"
-      style={{display: !optionUser.video ? "flex" : "none" }}
+      style={{ display: !optionUser.video ? "flex" : "none" }}
       id={peer.peerID + "-video_off"}>
       <div className="member-name-initial">{peer.name.slice(0, 1)}</div>
       <div className="member-name">
@@ -183,14 +183,14 @@ const Meet = (props) => {
     }
   }, [userUpdate])
 
-  window.onbeforeunload = function() { 
+  window.onbeforeunload = function () {
     if (socketRef && socketRef.current) {
-      socketRef.current.emit("disconnectMeet",{name,roomID})
+      socketRef.current.emit("disconnectMeet", { name, roomID })
     }
   }
 
   const disconnectMeet = () => {
-    socketRef.current.emit("disconnectMeet",{name,roomID})
+    socketRef.current.emit("disconnectMeet", { name, roomID })
     // stopTranscripting()
     setTranscripts([])
     transcriptsRef.current = []
@@ -432,8 +432,8 @@ const Meet = (props) => {
             peer,
             options: userID.options,
             name: userID.name,
-            new:true,
-            destroyed:false
+            new: true,
+            destroyed: false
           });
           peers.push({
             peerID: userID.id,
@@ -476,8 +476,8 @@ const Meet = (props) => {
           peer,
           options: payload.options,
           name: payload.name,
-          new:true,
-            destroyed:false
+          new: true,
+          destroyed: false
         });
         const peerUpdate = peersRef.current.filter((p) => p.peerID !== payload.callerID);
         peerUpdate.push({
@@ -485,7 +485,7 @@ const Meet = (props) => {
           peer,
           options: payload.options,
           name: payload.name,
-                      
+
         })
         toast.dark(`${payload.name} has joined`, {
           position: "top-left",
@@ -494,26 +494,25 @@ const Meet = (props) => {
         setPeers(peerUpdate)
       });
 
-      socketRef.current.on("user left", ({id,name}) => {
+      socketRef.current.on("user left", ({ id, name }) => {
         console.log("User Left", id);
-        
-        peersRef.current.filter((p) =>{
-          if(p.peerID == id)
-          {
-          p.destroyed=true;
-          p.peer.destroy();
-            if(name==undefined)
-            toast.dark(`${p.name} has left`, {
-              position: "top-left",
-              hideProgressBar: false
-            });
+
+        peersRef.current.filter((p) => {
+          if (p.peerID == id) {
+            p.destroyed = true;
+            p.peer.destroy();
+            if (name == undefined)
+              toast.dark(`${p.name} has left`, {
+                position: "top-left",
+                hideProgressBar: false
+              });
           }
         });
-        if(name!=undefined)
-        toast.dark(`${name} has left`, {
-          position: "top-left",
-          hideProgressBar: false
-        });
+        if (name != undefined)
+          toast.dark(`${name} has left`, {
+            position: "top-left",
+            hideProgressBar: false
+          });
       });
 
       socketRef.current.on("receiving returned signal", (payload) => {
@@ -804,12 +803,12 @@ const Meet = (props) => {
                       setCustomBackground(val)
                       if (val)
                         document.
-                        getElementsByClassName('meet-outer-layout')[0].
-                        style.backgroundImage = `url("https://picsum.photos/1920/1080")`
+                          getElementsByClassName('meet-outer-layout')[0].
+                          style.backgroundImage = `url("https://picsum.photos/1920/1080")`
                       else
                         document.
-                        getElementsByClassName('meet-outer-layout')[0].
-                        style.backgroundImage = null
+                          getElementsByClassName('meet-outer-layout')[0].
+                          style.backgroundImage = null
                     }} checked={customBackground} />
                 </li>
                 <li>Record Screen share
@@ -889,11 +888,11 @@ const Meet = (props) => {
 
           <div className="members-with-config" style={{ width: screenSharingEnabled.enabled ? '30%' : '100%' }}>
             <div className="members-row">
-              <div className="user-video-box" style={{display:camera?'flex':'none'}}>
-              <UserVideo hostRef={hostRef} muted={true} style={style} />
-              <div className="member-name">
-                    {name}
-                  </div>
+              <div className="user-video-box" style={{ display: camera ? 'flex' : 'none' }}>
+                <UserVideo hostRef={hostRef} muted={true} style={style} />
+                <div className="member-name">
+                  {name}
+                </div>
               </div>
               {camera
                 ? null :
@@ -908,9 +907,9 @@ const Meet = (props) => {
               }
               {
                 peersRef.current.map(peer => {
-                  
+
                   return <CreateRef peer={peer} style={style} />
-                 
+
                 })
               }
             </div>
