@@ -38,7 +38,7 @@ const CreateRef = ({ peer, style, options }) => {
   useEffect(() => {
 
     peer.peer.on("stream", (stream) => {
-      console.log("here")
+      
       if (clientRef && clientRef.current)
         clientRef.current.srcObject = stream
       peer.stream = stream
@@ -107,7 +107,6 @@ const Meet = (props) => {
   const screenStreamComponent = useRef()
   // Storing screen streams for each person
   const userScreenStreams = useRef([])
-  const history = useHistory()
   const [openChat, setOpenChat] = useState(false);
   const [chats, setChats] = useState([])
   const [transcripts, setTranscripts] = useState([])
@@ -116,6 +115,8 @@ const Meet = (props) => {
   const [screenSharingEnabled, setScreenSharingEnabled] = useState({ enabled: false, presenter: null })
   const screenSharingEnabledRef = useRef(false);
   const [customBackground, setCustomBackground] = useState(false)
+  const [recordedChunks, setRecordedChunks] = useState({ enabled: false, chunks: [] })
+  const mediaRecorder = useRef(null)
 
 
   const customStylesModal = {
@@ -136,14 +137,9 @@ const Meet = (props) => {
 
   const style = {
     width: "100%",
-    // maxWidth: "400px",
     height: "100%",
-    // display: camera ? "block" : "none",
-    // boxSizing: "border-box",
-    // boxShadow: "0px 1px 24px -1px rgba(0, 0, 0, 0.1)",
     borderRadius: "27px",
     objectFit: "cover",
-    // margin: "20px"
   }
 
   useEffect(() => {
@@ -183,13 +179,20 @@ const Meet = (props) => {
     }
   }, [userUpdate])
 
-  window.onbeforeunload = function () {
-    if (socketRef && socketRef.current) {
-      socketRef.current.emit("disconnectMeet", { name, roomID })
+
+    window.onbeforeunload = function () {
+      stopMediaRecorder()
+          socketRef.current.emit("disconnectMeet", { name, roomID })
+          // For delay if recording is going on and user refreshes or closes tab, which will lead to saving of file
+          // SetTimeout doesn't work in onBeforeUnload
+          if(mediaRecorder.current)
+          for(var i = 0; i < 1000; i++){
+            ;
+          }
     }
-  }
 
   const disconnectMeet = () => {
+    stopMediaRecorder()
     socketRef.current.emit("disconnectMeet", { name, roomID })
     // stopTranscripting()
     setTranscripts([])
@@ -234,11 +237,14 @@ const Meet = (props) => {
           }
         })
         screenStreamUpdate.getVideoTracks()[0].onended = function () {
+
+          stopMediaRecorder()
           setScreenSharingEnabled({ enabled: false, presenter: null })
           screenSharingEnabledRef.current = false
           if (screenStreamUpdate.getAudioTracks()[0])
             screenStreamUpdate.getAudioTracks()[0].stop();
           socketRef.current.emit("screen stream update", { updateStream: false, roomID, name })
+
         };
       })
     }
@@ -423,7 +429,7 @@ const Meet = (props) => {
       var options = { audio: mic, video: camera }
       socketRef.current.emit("join room", { roomID, options, name });
       socketRef.current.on("all users", (users) => {
-        console.log("All Users", users)
+        
         const peers = [];
         users.forEach((userID) => {
           const peer = createPeer(userID.id, socketRef.current.id, stream, options, name);
@@ -469,7 +475,6 @@ const Meet = (props) => {
 
       });
       socketRef.current.on("user joined", (payload) => {
-        console.log("User Joined data", payload)
         const peer = addPeer(payload.signal, payload.callerID, stream, payload.options, payload.name);
         peersRef.current.push({
           peerID: payload.callerID,
@@ -495,8 +500,6 @@ const Meet = (props) => {
       });
 
       socketRef.current.on("user left", ({ id, name }) => {
-        console.log("User Left", id);
-
         peersRef.current.filter((p) => {
           if (p.peerID == id) {
             p.destroyed = true;
@@ -516,7 +519,6 @@ const Meet = (props) => {
       });
 
       socketRef.current.on("receiving returned signal", (payload) => {
-        console.log("Receiving signal", payload)
         const item = peersRef.current.find((p) => p.peerID === payload.id);
         item.peer.signal(payload.signal);
       });
@@ -526,7 +528,7 @@ const Meet = (props) => {
       });
 
       socketRef.current.on("user added screen stream", (payload) => {
-        console.log("User added screen stream", payload)
+
         const peer = addPeerForScreenShare(payload.signal, payload.callerID, screenStream.current);
         screenSharesRef.current.push({
           peerID: payload.callerID + "-screen-share",
@@ -543,7 +545,7 @@ const Meet = (props) => {
       });
 
       socketRef.current.on("user left screen stream", (id) => {
-        console.log("User Left screen stream", id);
+
         const index = screenSharesRef.current.findIndex((p) => p.peerID === id);
 
         if (index != -1) {
@@ -558,13 +560,11 @@ const Meet = (props) => {
       });
 
       socketRef.current.on("receiving returned screen stream", (payload) => {
-        console.log("Receiving signal", payload)
         const item = screenSharesRef.current.find((p) => p.peerID === payload.id);
         item.peer.signal(payload.signal);
       });
 
       socketRef.current.on("screen share update", payload => {
-        console.log(payload)
         if (payload.updateStream) {
           setScreenSharingEnabled({ enabled: true, presenter: payload.id })
           screenSharingEnabledRef.current = true
@@ -591,6 +591,9 @@ const Meet = (props) => {
       })
 
     }).catch(err => {
+      toast.error('Devices not working properly',{
+        position:'top-left'
+      })
       console.log(err)
     })
   }
@@ -701,8 +704,70 @@ const Meet = (props) => {
     // }
   }
 
+  const startMediaRecorder = () => {
 
+    var videos = document.getElementsByTagName('video')
+    const audioContext = new AudioContext();
+    var audios = [];
+    var dest = audioContext.createMediaStreamDestination();
+    for (let video in Array.from(videos)) {
+      if (videos[video].id != 'user-own-video') {
+        if(videos[video].srcObject.getAudioTracks().length!=0)
+        audioContext.createMediaStreamSource(videos[video].srcObject).connect(dest)
+      }
+      else {
+        if(hostRef.current.srcObject.getAudioTracks().length!=0)
+        audioContext.createMediaStreamSource(hostRef.current.srcObject).connect(dest)
+      }
+    }
 
+    var newScreenRecorderStream = new MediaStream([dest.stream.getAudioTracks()[0], screenStreamComponent.current.srcObject.getVideoTracks()[0]])
+
+    setRecordedChunks({ enabled: true, chunks: [...recordedChunks.chunks] })
+    toast.info("Screen Recording Started", {
+      position: 'top-left'
+    })
+
+    // add opus in mimeType so that firefox also supports
+    var options = { mimeType: 'video/webm;codecs=vp8,opus' };
+    mediaRecorder.current = new MediaRecorder(newScreenRecorderStream, options);
+
+    mediaRecorder.current.ondataavailable = handleDataAvailable;
+    mediaRecorder.current.start();
+
+    function handleDataAvailable(event) {
+      
+      if (event.data.size > 0) {
+        recordedChunks.chunks.push(event.data);
+        setRecordedChunks({ enabled: recordedChunks.enabled, chunks: [...recordedChunks.chunks] })
+        download();
+      }
+    }
+  }
+  const download = () => {
+
+    var blob = new Blob(recordedChunks.chunks, {
+      type: "video/webm"
+    });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    document.body.appendChild(a);
+    a.style = "display: none";
+    a.href = url;
+    a.download = `Recording-${new Date()}.webm`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+    setRecordedChunks({ enabled: false, chunks: [] })
+    toast.info("Screen Recording Stopped", {
+      position: 'top-left'
+    })
+    mediaRecorder.current = null
+  }
+  const stopMediaRecorder = () => {
+    if (mediaRecorder.current) {
+      mediaRecorder.current.stop()
+    }
+  }
 
 
   return (
@@ -811,7 +876,24 @@ const Meet = (props) => {
                           style.backgroundImage = null
                     }} checked={customBackground} />
                 </li>
-                <li>Record Screen share
+                <li onClick={() => {
+                  if (screenSharingEnabled.enabled && screenSharingEnabled.presenter != socketRef.current.id)
+                    return toast.dark("Only presenter can record screen", {
+                      position: 'top-left'
+                    })
+                  if (screenSharingEnabled.enabled && recordedChunks.enabled) {
+                    stopMediaRecorder()
+                  }
+                  else if (screenSharingEnabled.enabled && !recordedChunks.enabled) {
+                    startMediaRecorder()
+                  }
+                  else {
+                    toast.dark("Start Screen Sharing before Recording", {
+                      position: 'top-left'
+                    })
+                  }
+                }}>
+                  {screenSharingEnabled.enabled && recordedChunks.enabled ? 'Stop Screen Recording' : 'Start Screen Recording'}
                   <Icon icon={record48Regular}
                     style={{
                       color: '#eb4a4a'
@@ -889,7 +971,7 @@ const Meet = (props) => {
           <div className="members-with-config" style={{ width: screenSharingEnabled.enabled ? '30%' : '100%' }}>
             <div className="members-row">
               <div className="user-video-box" style={{ display: camera ? 'flex' : 'none' }}>
-                <UserVideo hostRef={hostRef} muted={true} style={style} />
+                <UserVideo hostRef={hostRef} id="user-own-video" muted={true} style={style} />
                 <div className="member-name">
                   {name}
                 </div>
