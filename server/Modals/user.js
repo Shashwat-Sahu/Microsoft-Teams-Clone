@@ -17,7 +17,15 @@ const roomSchema = new mongoose.Schema({
     }
 }
 ]
-
+,
+screenShareInRoom: {
+    id: {
+        type: String
+    },
+    name: {
+        type: String
+    }
+}
 })
 roomSchema.path('roomUsers').validate(function (value) {
     console.log(value.length)

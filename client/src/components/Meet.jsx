@@ -21,9 +21,7 @@ import transcriptIcon from '@iconify/icons-gg/transcript';
 import Chats from "./Chats";
 import { connect } from 'react-redux';
 import "../styles/meet.css"
-import { useBeforeunload } from 'react-beforeunload';
 import Modal from 'react-modal';
-import { useHistory } from 'react-router-dom'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Transcript from './Transcript'
@@ -84,15 +82,13 @@ const Meet = (props) => {
     name,
     email,
     setName,
-    setEmail,
-    setVideoDevices,
-    setAudioDevices } = props;
+    setEmail, } = props;
 
   const hostRef = useRef()
   const [peers, setPeers] = useState([]);
   const [userUpdate, setUserUpdate] = useState();
   // Modal to ask Name from user (optional)
-  const [modalIsOpen, setIsOpen] = useState(name == "Anonymous" ? true : false)
+  const [modalIsOpen, setIsOpen] = useState(name==="Anonymous" ? true : false)
   const [chatBadge, setChatBadge] = useState(false)
   const socketRef = useRef();
   const peersRef = useRef([]);
@@ -143,7 +139,7 @@ const Meet = (props) => {
   }
 
   useEffect(() => {
-    if (name != "Anonymous")
+    if (name!=="Anonymous")
       startStream()
   }, [])
 
@@ -153,7 +149,7 @@ const Meet = (props) => {
       peer.peer.on("stream", (stream) => {
         userScreenStreams.current.push({ peerID: peer.peerID, stream })
         i++;
-        if (i == screenSharesRef.current.length && !screenSharingEnabledRef.current) {
+        if (i===screenSharesRef.current.length && !screenSharingEnabledRef.current) {
           socketRef.current.emit("screen streaming running for new user", { roomID })
         }
       })
@@ -246,6 +242,11 @@ const Meet = (props) => {
           socketRef.current.emit("screen stream update", { updateStream: false, roomID, name })
 
         };
+      }).catch(err=>{
+        toast.error(`Your device doesn't support screen share`, {
+          position: "top-left",
+          hideProgressBar: true
+        });
       })
     }
     else {
@@ -387,7 +388,7 @@ const Meet = (props) => {
 
   // const stopTranscripting =() =>{
   //   // const interval = setInterval(function() {
-  //   //   if (ws.bufferedAmount == 0){
+  //   //   if (ws.bufferedAmount===0){
   //       // ws.send(JSON.stringify({
   //       //   type: 'stop_request'
   //       // }));
@@ -492,26 +493,27 @@ const Meet = (props) => {
           name: payload.name,
 
         })
+
+        setPeers(peerUpdate)
         toast.dark(`${payload.name} has joined`, {
           position: "top-left",
-          hideProgressBar: false
+          hideProgressBar: true
         });
-        setPeers(peerUpdate)
       });
 
       socketRef.current.on("user left", ({ id, name }) => {
         peersRef.current.filter((p) => {
-          if (p.peerID == id) {
+          if (p.peerID===id) {
             p.destroyed = true;
             p.peer.destroy();
-            if (name == undefined)
+            if (name===undefined)
               toast.dark(`${p.name} has left`, {
                 position: "top-left",
                 hideProgressBar: false
               });
           }
         });
-        if (name != undefined)
+        if (name!==undefined)
           toast.dark(`${name} has left`, {
             position: "top-left",
             hideProgressBar: false
@@ -548,7 +550,7 @@ const Meet = (props) => {
 
         const index = screenSharesRef.current.findIndex((p) => p.peerID === id);
 
-        if (index != -1) {
+        if (index!==-1) {
           if (screenSharesRef.current[index]) {
             screenSharesRef.current[index].peer.destroy();
           }
@@ -568,7 +570,7 @@ const Meet = (props) => {
         if (payload.updateStream) {
           setScreenSharingEnabled({ enabled: true, presenter: payload.id })
           screenSharingEnabledRef.current = true
-          const peer = userScreenStreams.current.find((peer) => peer.peerID == payload.id + "-screen-share");
+          const peer = userScreenStreams.current.find((peer) => peer.peerID===payload.id + "-screen-share");
           screenStreamComponent.current.srcObject = peer.stream;
           toast.dark(`${payload.name} started screen sharing`, {
             position: "top-left",
@@ -684,11 +686,11 @@ const Meet = (props) => {
 
           socketRef.current.emit("change", {
             id: socketRef.current.id,
-            video: kind == "video" ? !camera : camera,
-            audio: kind == "audio" ? !mic : mic,
+            video: kind==="video" ? !camera : camera,
+            audio: kind==="audio" ? !mic : mic,
             roomID
           });
-          track.enabled = kind == "audio" ? !mic : !camera;
+          track.enabled = kind==="audio" ? !mic : !camera;
         }
         Toggler(state, setState)
       })
@@ -711,7 +713,7 @@ const Meet = (props) => {
     var audios = [];
     var dest = audioContext.createMediaStreamDestination();
     for (let video in Array.from(videos)) {
-      if (videos[video].id != 'user-own-video') {
+      if (videos[video].id!=='user-own-video') {
         if(videos[video].srcObject.getAudioTracks().length!=0)
         audioContext.createMediaStreamSource(videos[video].srcObject).connect(dest)
       }
@@ -859,7 +861,7 @@ const Meet = (props) => {
                 style={{ color: '#10a19f' }}
               />
               <ul className="dropdown-meet">
-                <li>Custom Background
+                <li>Change Wallpaper
                   <Switch
                     className="background-switcher"
                     uncheckedIcon={false}
@@ -877,7 +879,7 @@ const Meet = (props) => {
                     }} checked={customBackground} />
                 </li>
                 <li onClick={() => {
-                  if (screenSharingEnabled.enabled && screenSharingEnabled.presenter != socketRef.current.id)
+                  if (screenSharingEnabled.enabled && screenSharingEnabled.presenter!==socketRef.current.id)
                     return toast.dark("Only presenter can record screen", {
                       position: 'top-left'
                     })
@@ -917,20 +919,20 @@ const Meet = (props) => {
                 className="screen-share"
               /> :
               <Icon icon={shareScreenStop20Filled}
-                data-tip={socketRef.current && screenSharingEnabled.presenter == socketRef.current.id
+                data-tip={socketRef.current && screenSharingEnabled.presenter===socketRef.current.id
                   ?
                   'Stop Screen Share'
                   : 'Only presenter can stop screen sharing'
                 }
                 onClick={
 
-                  socketRef.current && screenSharingEnabled.presenter == socketRef.current.id
+                  socketRef.current && screenSharingEnabled.presenter===socketRef.current.id
                     ?
                     screenShare
                     :
                     null
                 }
-                className={`screen-share ${socketRef.current && screenSharingEnabled.presenter != socketRef.current.id
+                className={`screen-share ${socketRef.current && screenSharingEnabled.presenter!==socketRef.current.id
                   ?
                   'screen-share-disabled'
                   :
@@ -963,7 +965,7 @@ const Meet = (props) => {
 
           <div className="screen-share-box" style={{ display: screenSharingEnabled.enabled ? 'flex' : 'none' }}>
             <video ref={screenStreamComponent}
-              muted={socketRef.current && screenSharingEnabled.presenter == socketRef.current.id}
+              muted={socketRef.current && screenSharingEnabled.presenter===socketRef.current.id}
               playsInline id="share-screen-user"
               autoPlay />
           </div>
