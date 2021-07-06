@@ -1,16 +1,38 @@
 import {combineReducers} from 'redux'
 
 var initState = {
-    name: 'Anonymous',
+    id:null,
+    name: '',
     email: '',
     mic:false,
     camera:false,
     stream:null,
     videoDevices:[],
-    audioDevices:[]
+    audioDevices:[],
+    auth:false,
+    socket:null,
+    joiningRoom:null
 }
 
 const userDetailsReducer = (state = initState, action) => {
+    if (action.type === 'SET_USER_ID') {
+        return {
+            ...state,
+            id: action.id
+        }
+    }
+    if (action.type === 'SET_SOCKET') {
+        return {
+            ...state,
+            socket: action.socket
+        }
+    }
+    if (action.type === 'SET_AUTH') {
+        return {
+            ...state,
+            auth: action.auth
+        }
+    }
     if (action.type === 'SET_NAME') {
         return {
             ...state,
@@ -51,6 +73,12 @@ const userDetailsReducer = (state = initState, action) => {
         return {
             ...state,
             audioDevices: action.audioDevices
+        }
+    }
+    if (action.type === 'SET_JOINING_ROOM') {
+        return {
+            ...state,
+            joiningRoom: action.joiningRoom
         }
     }
     return state

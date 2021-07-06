@@ -1,36 +1,25 @@
 const mongoose = require('mongoose')
 
-const roomSchema = new mongoose.Schema({
-    roomID:String,
-    roomUsers:[{
-    id:{
-        type:String,
-        required:true
-    },
+const userSchema = new mongoose.Schema({
     name:{
         type:String,
         required:true
     },
-    options:{
-        video:Boolean,
-        audio:Boolean
-    }
-}
-]
-,
-screenShareInRoom: {
-    id: {
-        type: String
+    email:{
+        type:String,
+        required:true
     },
-    name: {
-        type: String
+    password:{
+        type:String,
+        required:true
+    },
+    rooms:[{
+        type:String
+    }],
+    socket:{
+        type:Object
     }
-}
-})
-roomSchema.path('roomUsers').validate(function (value) {
-    console.log(value.length)
-    if (value.length > 10) {
-      throw new Error("Atmost 10 people allowed!");
     }
-  })
-mongoose.model("Room",roomSchema);
+)
+
+mongoose.model("User",userSchema);

@@ -13,7 +13,7 @@ code {
 }
 @media screen and (min-width:660px) {
 ::-webkit-scrollbar {
-  width: 9px;
+  width: 4px;
 }
 
 ::-webkit-scrollbar-track {

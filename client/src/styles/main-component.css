@@ -1,0 +1,359 @@
+.main-component-parent{
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100vh;
+}
+.main-component-header{
+    background-color: rgb(15, 155, 155);
+    padding: 10px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    color:white;
+    place-items: center;
+    height: 10%;
+}
+.main-component-content{
+    display: flex;
+    flex-direction: row;
+    height: 100%;
+    width: 100%;
+    height: 90%;
+}
+.header-logo-box{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    place-items: center;
+}
+.room-join-options-hover{
+    display: flex;
+    place-items: center;
+    height: 100%;
+    
+    font-size: 2em;
+    position: relative;
+}
+.top-header-side-options{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    place-items: center;
+    width: 10%;
+}
+.top-header-side-options svg{
+    font-size: 30px;
+}
+.logo-main-component{
+    width: 50px;
+    height: 50px;
+    margin-right: 10px;
+}
+.main-chat-pro-sidebar{
+    width: 22%;
+    min-width: auto;
+    z-index: 0;
+}
+.main-chat-pro-header{
+    padding: 10px;
+    background-color: rgb(10, 191, 204);
+    color: #fff;
+    height: 60px!important;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+.main-chat-pro-content{
+    overflow: auto;
+    height: 100%;
+    /* background-color: rgb(243, 237, 237); */
+    background-image: url('https://images.hdqwalls.com/wallpapers/simple-subtle-abstract-dark-minimalism-4k-u9.jpg');
+    background-size: cover;
+
+}
+.sidebar-room{
+    display: flex;
+    flex-direction: row;
+    place-items: center;
+    padding: 10px;
+    font-weight: 700;
+}
+.room-initial
+{
+    width: 50px;
+    height: 50px;
+    display: flex;
+    flex-direction: row;
+    place-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background-color: rgb(18, 97, 172);
+    color: white;
+    margin-right: 10px;
+}
+.sidebar-room:hover{
+    cursor: pointer;
+    background-color: rgb(228, 222, 222);
+}
+.main-chat-chats-box{
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+}
+.main-chat-chats-box-header{
+    padding: 10px;
+    display: flex;
+    flex-direction: row;
+    place-items: center;    
+    height: 60px;
+    box-sizing: border-box;
+    width: 100%;
+    justify-content: space-between;
+    background-color: #fff;
+    box-shadow: 0px 10px 5px #000;
+}
+.main-chat-chats-box-content{
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+.room-detail{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    place-items: center;
+}
+.join-meet-main-chat{
+    /* padding:10px;
+    background-color:#0e8581;
+    color:#fff;
+    border: none;
+    border-radius: 27px;
+    box-shadow: 2px 2px 5px #03524e , 
+    -2px -2px 5px #fff;
+    font-weight: 800;
+    width: 20%;
+    font-family: "Ubuntu";
+    min-width: 95px; */
+    font-size: 30px;
+    color: #333;
+}
+.main-chat-chats-box-content{
+    /* background-color: #03524e; */
+    background-image: url('https://cdn.wallpapersafari.com/83/8/IKXE93.jpg');
+    background-size: cover;
+    z-index: 0;
+}
+.room-name h5{
+    font-size: 10px;
+}
+.main-chat-chats-box-footer{
+    padding: 20px;
+    background-color: white;
+    display: flex;
+    flex-direction: row;
+    place-items: center;
+}
+.main-chat-chats-box-footer input{
+    color: black;
+    width: 90%;
+}
+.room-join-options-hover:hover .room-join-options{
+    display: block;
+    cursor: pointer;
+}
+.room-join-options{
+    position: absolute;
+    left: -115px;
+    background-color: rgb(8, 139, 100);
+    list-style: none;
+    z-index: 1011;
+    box-shadow: 0 0 5px #333;
+    border-radius: 12px;
+    overflow: hidden;
+    display: none;
+}
+.room-join-options li{
+border-bottom: 1px solid #aaa;
+font-size: 0.5em;
+padding: 10px;
+}
+.room-join-options li:last-child{
+    border-bottom: none;
+}
+.room-join-options li:hover{
+    background-color: rgb(4, 97, 69);
+}
+.modal-input-main-component{
+    width: 80%;
+    color: white;
+    background-color: transparent;
+    border: none;
+    outline: none;
+    border-bottom: 1px solid #333;
+    padding: 10px;
+}
+#modal-main-component{
+    z-index: 3;
+    background: linear-gradient(110.08deg, rgba(31, 59, 68, 0.4) 4.89%, rgba(31, 59, 68, 0.1) 93.4%)!important;
+    border-top: 1px solid rgba(255, 255, 255, 0.5)!important;
+    border-left: 1px solid rgba(255, 255, 255, 0.5)!important;
+    border-bottom: 1px solid rgba(4, 94, 97, 0.5)!important;
+    border-right: 1px solid rgba(4, 94, 97, 0.5)!important;
+    backdrop-filter: blur(20px)!important;
+    border-radius: 20px!important;
+    color: #fff;
+    box-shadow: 0 0 10px #333;
+
+}
+
+.join-room-main-chat{
+    padding:10px;
+    background-color:#0e8581;
+    color:#fff;
+    border: none;
+    border-radius: 27px;
+    box-shadow: 2px 2px 5px #023a37 , 
+    -1px -1px 5px rgb(187, 183, 183);
+    font-weight: 800;
+    width: 20%;
+    font-family: "Ubuntu";
+    min-width: 95px;
+}
+.join-room-main-chat:hover{
+    cursor: pointer;
+}
+.no-room-selected{
+    display: flex;
+    flex-direction: column;
+    place-items: center;
+    justify-content: center;
+    width: 100%;
+    background-image: url('https://s.walldump.com/wallpapers/walldump-9e0JmevNo.jpg');
+    background-size: cover;
+    color: #fff;
+    text-shadow: 0px 0px 5px #000;
+}
+.sidebar-room-chat{
+    align-self: flex-start;
+    display: flex;
+    flex-direction: row;
+    place-items: center;
+    justify-content: space-between;
+    min-width: 150px;
+    margin: 5px;
+    max-width: 50%;
+}
+#shiftChat{
+    align-self: flex-end!important;
+    
+    justify-content: flex-end;
+}
+#shiftChat .room-initial-chat{
+    margin-left: 10px;
+    margin-right: 0;
+    order: 1;
+}
+.chat-user{
+    display: flex;
+    flex-direction: column;
+    /* border-radius: 30px; */
+    background-color: rgba(51, 51, 51, 0.726);
+    border-radius: 12px;
+    color: white;
+    padding: 7px;
+    min-width: 150px;
+    
+}
+.chat-user-message{
+    word-wrap: break-word;
+    width: 100%;
+}
+#shiftChat >.chat-user > h4,#shiftChat > .chat-user > div{
+    align-self: flex-end;
+}
+.room-initial-chat{
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    place-items: center;
+    justify-content: center;
+    color: #fff;
+    font-weight: 700;
+    margin: auto 10px;
+}
+.chat-entry{
+    outline: none;
+    border: none;
+    border-bottom: 1px solid rgb(119, 117, 117);
+    padding: 2px;
+}
+.room-initial-chat-box-header{
+    height: 50px;
+    width: 50px;
+    background-color: rgb(17, 82, 167);
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    place-items: center;
+    justify-content: center;
+    color: #fff;
+    font-weight: 700;
+    margin: auto 10px;
+}
+.join-meet-outer-box{
+    position: relative;
+}
+.join-meet-outer{
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+@media screen and (max-width:660px){
+    .main-chat-pro-sidebar{
+        position: absolute;
+        z-index: 1;
+        width: 80%;
+    }
+    .main-chat-chats-box{
+        width: 100%;
+    }
+    .top-header-side-options{
+        width: 20%;
+    }
+    .no-room-selected{
+        width: 100%;
+    }
+    .room-initial-chat-box-header{
+        width: 40px;
+        height: 40px;
+    }
+    .room-initial-chat{
+        height: 10px;
+        width: 10px;
+        font-size: 8px;
+    }
+    .sidebar-room-chat
+    {
+        width: 100%;
+    }
+    .header-logo-box img{
+        width: 35px;
+        height: 35px;
+        margin-right: 5px;
+    }
+    .header-logo-box h3{
+        font-size: 1em;
+    }
+    .room-join-options-hover{
+        height: 100%;
+    }
+    .chat-user{
+        width: 100%;
+    }
+}

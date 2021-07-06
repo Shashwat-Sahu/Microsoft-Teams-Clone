@@ -12,9 +12,11 @@ app.use((req, res, next) => {
     res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
     next();
 });
+app.use(express.json())
 app.get("/", (req, res) => {
     res.send("Live")
 });
+
 // app.use(cors)
 
 
@@ -24,9 +26,11 @@ const request = require('request');
 
 
 require('dotenv').config()
+require("./Modals/room")
 require("./Modals/user")
 
-
+app.use(require("./Routes/auth"));
+app.use(require("./Routes/chats"));
 
 const mongoose = require('mongoose');
 const Room = mongoose.model('Room');
@@ -151,12 +155,12 @@ io.on('connection', socket => {
 
             }
 
-            if (room&& (room.roomUsers.length == 0 || (room.roomUsers.length == 1 && room.roomUsers[0].id == socket.id))) {
-                Room.findOneAndDelete({ roomID: roomID }).then(room => {
-                    console.log("deleted room", room)
-                })
+            // if (room&& (room.roomUsers.length == 0 || (room.roomUsers.length == 1 && room.roomUsers[0].id == socket.id))) {
+            //     Room.findOneAndDelete({ roomID: roomID }).then(room => {
+            //         console.log("deleted room", room)
+            //     })
 
-            }
+            // }
             Room.findOne({ roomID: roomID }).then(data => {
                 console.log(data)
                 console.log(socket.id)
@@ -169,8 +173,9 @@ io.on('connection', socket => {
                             }
                         }
                     }, {
-                        upsert: true,
-                        returnOriginal: false
+                        
+                        new:true,
+                        upsert: true
                     }
                     ).then(room => {
                         console.log(room);
@@ -209,12 +214,25 @@ io.on('connection', socket => {
         })
     });
     socket.on("send message", (payload) => {
-        Room.findOne({ roomID: payload.roomID }).then(room => {
+        Room.findOneAndUpdate(
+            { roomID: payload.roomID }
+            ,
+            {
+                $push:{
+                    chats:{
+                        userId:payload.id,
+                        name:payload.name,
+                        message:payload.message
+                    }
+                }
+            },{
+                new:true
+            }).then(room => {
             console.log(room)
-            if (room && room.roomUsers) {
-                room.roomUsers.forEach(user => {
-                    if (socket.id !== user.id)
-                        io.to(user.id).emit('receivedMessage', payload)
+            if (room && room.roomPresentUsers) {
+                room.roomPresentUsers.forEach(user => {
+                    if (socket.id !== user.socketId)
+                        io.to(user.socketId).emit('receivedMessage', payload)
                 })
             }
         })

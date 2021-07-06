@@ -1,0 +1,107 @@
+.sign-up-parent{
+    display: flex;
+    flex-direction: column;
+    place-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    height: 100vh;
+     background:url('../assets//hand-painted-mountains.jpg');
+     background-size: cover;
+    /* background-size: 400% 400%;
+    animation: gradient 15s ease infinite; */
+}
+@keyframes gradient {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+.signup-logo-box{
+    align-self: flex-start;
+    padding: 10px;
+    display: flex;
+    flex-direction: row;
+    place-items: center;
+    justify-content: center;
+}
+.logo-signup{
+    width: 50px;
+    height: 50px;
+    margin-right: 10px;
+}
+.signup-head{
+    margin-top: 40px;
+    color: teal;
+}
+.signup-entry-box{
+    height: 450px;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-evenly;
+    flex-wrap: wrap;
+    align-items: center;
+    width: 35%;
+    min-width: 300px;
+    box-sizing: border-box;
+    border-radius: 27px;
+    z-index: 0; 
+    position: relative;  
+    align-self: center;
+    background-color: white;
+    border: 1px solid rgb(11, 190, 167);
+    box-shadow: 0 0 5px rgb(59, 59, 59);
+}
+.avatar-signup{
+    width: 100px;
+    position: absolute;
+    top: -60px;
+    border: 1px dashed black;
+    border-radius:50%;
+    padding:10px;
+    background-color: #fff;
+}
+.signup-bottom-vector{
+    width: 20%;
+    /* position: absolute;
+    bottom: 5px; */
+}
+.email-input,.name-input,.password-input{
+    width: 80%;
+    border: none;
+    outline: none;
+    border-bottom: 1px solid #c5b9b9;
+    padding:10px;
+    font-family: Ubuntu;
+}
+.signup-password-format{
+    width: 80%;
+}
+.signup-entry-options
+{
+    display:flex;
+    flex-direction:row;
+    place-items: center;
+    width: 100%;
+    justify-content:space-around;
+}
+.signup-entry-buttons{
+    padding:10px;
+    background-color:#0e8581;
+    color:#fff;
+    border: none;
+    border-radius: 27px;
+    box-shadow: 2px 2px 5px #03524e , 
+    -2px -2px 5px #fff;
+    font-weight: 800;
+    width: 40%;
+    font-family: "Ubuntu";
+}
+.signup-entry-buttons:hover{
+    cursor: pointer;
+}
+

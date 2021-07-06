@@ -64,7 +64,7 @@ const Home = (props) => {
     },
   };
 
-
+  const roomID = props.match.params.teamId;
   useEffect(() => {
     MediaInit({ camera, mic, hostRef, setStream, setAudioDevices, setVideoDevices }).then((stream) => {
       setStream(stream)
@@ -99,8 +99,8 @@ const Home = (props) => {
       >
         <h3>Get your link</h3>
         <div className="modal-content-home">
-          <Link to={`/teams/${link.current}`} style={{color:'white'}}>{window.location.href+"teams/"+link.current}</Link>
-          <CopyToClipboard text={window.location.href+"teams/"+link.current}
+          <Link to={`/teams/${roomID}`} style={{color:'white'}}>{window.location.href.split('/')[0]+"//"+window.location.href.split('/')[2]+"/teams/"+roomID}</Link>
+          <CopyToClipboard text={window.location.href.split('/')[0]+"//"+window.location.href.split('/')[2]+"teams/"+roomID}
           onCopy={()=>{
             toast.dark('Link copied!')
           }}>
@@ -161,25 +161,12 @@ const Home = (props) => {
       <div className="home-side-right">
         <div className="entry-box">
           <img src={Avatar} className="avatar-home" alt="Avatar" />
-          <input
-            type="email"
-            placeholder="Enter Email ID"
-            className="email-input"
-            onChange={(e) => { setEmail(e.target.value) }}
-
-          />
-          <input
-            type="text"
-            placeholder="Enter Name"
-            className="name-input"
-            onChange={(e) => { setName(e.target.value) }}
-
-          />
+          <h1>Join your meeting !</h1>
           <div className="home-entry-options">
             <button
               className="home-entry-buttons"
               onClick={() => {
-                history.push(`/teams/${link.current}`)
+                history.push(`/teams/${roomID}`)
               }}
             >Join Now</button>
             <button
@@ -188,7 +175,7 @@ const Home = (props) => {
                 setmodalIsOpen(true)
               }}
             >
-              Generate Link
+              Share Link
             </button>
           </div>
         </div>

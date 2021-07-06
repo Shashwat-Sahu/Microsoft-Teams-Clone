@@ -26,6 +26,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Transcript from './Transcript'
 import { prodUrl as url } from "../Config/config.json"
+import axios from "axios"
 
 
 const CreateRef = ({ peer, style, options }) => {
@@ -82,13 +83,16 @@ const Meet = (props) => {
     name,
     email,
     setName,
-    setEmail, } = props;
+    setEmail,
+    socket,
+    id,
+  setSocket } = props;
 
   const hostRef = useRef()
   const [peers, setPeers] = useState([]);
   const [userUpdate, setUserUpdate] = useState();
   // Modal to ask Name from user (optional)
-  const [modalIsOpen, setIsOpen] = useState(name==="Anonymous" ? true : false)
+  const [modalIsOpen, setIsOpen] = useState(name==="" ? true : false)
   const [chatBadge, setChatBadge] = useState(false)
   const socketRef = useRef();
   const peersRef = useRef([]);
@@ -139,7 +143,7 @@ const Meet = (props) => {
   }
 
   useEffect(() => {
-    if (name!=="Anonymous")
+    if (name!=="")
       startStream()
   }, [])
 
@@ -201,9 +205,33 @@ const Meet = (props) => {
 
   const startStream = () => {
     setIsOpen(false)
-    socketRef.current = io.connect(url);
-    createStream();
-    startChat()
+    if(socket){
+      socketRef.current=socket
+      createStream();
+      startChat()
+    }
+    else{
+      var socketNew = io.connect(`${url}`)
+      socketNew.on('connect',()=>{
+        axios({
+          url: `${url}/updateSocket`,
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${localStorage.getItem('TeamsToken')}`
+          },
+          data: {
+              "socketId": socketNew.id
+          }
+      }).then(data => {
+          console.log(data)
+      })
+        socketRef.current = socketNew;
+        createStream();
+        startChat()
+      })
+    }
+
   }
 
   const startChat = () => {
@@ -273,7 +301,7 @@ const Meet = (props) => {
 
 
   const sendMessage = (sendMessage) => {
-    const payload = { name, message: sendMessage, senderId: socketRef.current.id, roomID };
+    const payload = { name, message: sendMessage, senderId: socketRef.current.id,id, roomID };
     socketRef.current.emit("send message", payload);
     chatsRef.current = [...chatsRef.current, { name: "You", message: payload.message }]
     const chatsUpdated = chatsRef.current;
@@ -1065,19 +1093,33 @@ const mapStateToProps = state => {
     camera: state.userDetails.camera,
     stream: state.userDetails.stream,
     videoDevices: state.userDetails.videoDevices,
-    audioDevices: state.userDetails.audioDevices
+    audioDevices: state.userDetails.audioDevices,
+    socket: state.userDetails.socket,
+    id: state.userDetails.id
   }
 }
 
 const mapDispatchToProps = dispatch => {
   return {
-
+    setUserId: data => {
+      dispatch({
+        type: 'SET_USER_ID',
+        id: data,
+      })
+    },
     setEmail: data => {
       dispatch({
         type: 'SET_EMAIL',
         email: data,
       })
     },
+    setSocket: data => {
+      dispatch({
+        type: 'SET_SOCKET',
+        socket: data,
+      })
+    }
+    ,
     setName: data => {
       dispatch({
         type: 'SET_NAME',
