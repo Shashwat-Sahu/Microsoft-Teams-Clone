@@ -100,7 +100,7 @@ const Home = (props) => {
         <h3>Get your link</h3>
         <div className="modal-content-home">
           <Link to={`/teams/${roomID}`} style={{color:'white'}}>{window.location.href.split('/')[0]+"//"+window.location.href.split('/')[2]+"/teams/"+roomID}</Link>
-          <CopyToClipboard text={window.location.href.split('/')[0]+"//"+window.location.href.split('/')[2]+"teams/"+roomID}
+          <CopyToClipboard text={window.location.href.split('/')[0]+"//"+window.location.href.split('/')[2]+"/teams/"+roomID}
           onCopy={()=>{
             toast.dark('Link copied!')
           }}>

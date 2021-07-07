@@ -1,17 +1,18 @@
-import {combineReducers} from 'redux'
+import { combineReducers } from 'redux'
 
 var initState = {
-    id:null,
+    id: null,
     name: '',
     email: '',
-    mic:false,
-    camera:false,
-    stream:null,
-    videoDevices:[],
-    audioDevices:[],
-    auth:false,
-    socket:null,
-    joiningRoom:null
+    mic: false,
+    camera: false,
+    stream: null,
+    videoDevices: [],
+    audioDevices: [],
+    auth: false,
+    socket: null,
+    joiningRoom: null,
+    joiningPath: null
 }
 
 const userDetailsReducer = (state = initState, action) => {
@@ -81,11 +82,17 @@ const userDetailsReducer = (state = initState, action) => {
             joiningRoom: action.joiningRoom
         }
     }
+    if (action.type === 'SET_JOINING_PATH') {
+        return {
+            ...state,
+            joiningPath: action.joiningPath
+        }
+    }
     return state
 }
 
 const Reducer = combineReducers({
-    userDetails:userDetailsReducer
+    userDetails: userDetailsReducer
 })
 
 export default Reducer;

@@ -73,6 +73,10 @@
     background-size: cover;
 
 }
+#selectedRoom{
+    background-color: #333;
+    color: #fff;
+}
 .sidebar-room{
     display: flex;
     flex-direction: row;
@@ -141,8 +145,7 @@
     color: #333;
 }
 .main-chat-chats-box-content{
-    /* background-color: #03524e; */
-    background-image: url('https://cdn.wallpapersafari.com/83/8/IKXE93.jpg');
+    background: linear-gradient(45deg,#364f6b,#fc5185);
     background-size: cover;
     z-index: 0;
 }
@@ -174,6 +177,27 @@
     border-radius: 12px;
     overflow: hidden;
     display: none;
+}
+.room-options-chat{
+    display: flex;
+    flex-direction: row;
+    place-items: center;
+    justify-content: space-between;
+    width: 10%;
+}
+.background-switcher-chat{
+    width: 40px;
+    height: 20px;
+}
+.background-switcher-chat .react-switch-bg
+{
+    width: 100%!important;
+    height: 100%!important;
+}
+.background-switcher-chat .react-switch-handle
+{
+    height: 19px!important;
+    width: 19px!important;
 }
 .room-join-options li{
 border-bottom: 1px solid #aaa;
@@ -355,5 +379,8 @@ padding: 10px;
     }
     .chat-user{
         width: 100%;
+    }
+    .room-options-chat{
+        width: 25%;
     }
 }

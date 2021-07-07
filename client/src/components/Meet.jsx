@@ -85,8 +85,9 @@ const Meet = (props) => {
     setName,
     setEmail,
     socket,
+    setSocket,
     id,
-  setSocket } = props;
+   } = props;
 
   const hostRef = useRef()
   const [peers, setPeers] = useState([]);
@@ -227,6 +228,7 @@ const Meet = (props) => {
           console.log(data)
       })
         socketRef.current = socketNew;
+        setSocket(socketNew)
         createStream();
         startChat()
       })
