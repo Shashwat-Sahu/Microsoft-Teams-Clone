@@ -1,7 +1,7 @@
 import { combineReducers } from 'redux'
 
 var initState = {
-    id: null,
+    userId: null,
     name: '',
     email: '',
     mic: false,
@@ -19,7 +19,7 @@ const userDetailsReducer = (state = initState, action) => {
     if (action.type === 'SET_USER_ID') {
         return {
             ...state,
-            id: action.id
+            userId: action.userId
         }
     }
     if (action.type === 'SET_SOCKET') {

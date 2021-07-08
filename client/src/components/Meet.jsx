@@ -30,14 +30,15 @@ import axios from "axios"
 
 
 const CreateRef = ({ peer, style, options }) => {
+  // Ref for each peer
   const clientRef = useRef();
+  // check whether peer video and audio setting before rendering them
   var optionUser = peer.options ? peer.options : { video: false, audio: false };
   if (options)
-    optionUser = options;
+  optionUser = options;
   useEffect(() => {
-
     peer.peer.on("stream", (stream) => {
-      
+
       if (clientRef && clientRef.current)
         clientRef.current.srcObject = stream
       peer.stream = stream
@@ -81,19 +82,17 @@ const Meet = (props) => {
     stream,
     setStream,
     name,
-    email,
     setName,
-    setEmail,
     socket,
     setSocket,
-    id,
-   } = props;
+    userId,
+  } = props;
 
   const hostRef = useRef()
   const [peers, setPeers] = useState([]);
   const [userUpdate, setUserUpdate] = useState();
   // Modal to ask Name from user (optional)
-  const [modalIsOpen, setIsOpen] = useState(name==="" ? true : false)
+  const [modalIsOpen, setIsOpen] = useState(name === "" ? true : false)
   const [chatBadge, setChatBadge] = useState(false)
   const socketRef = useRef();
   const peersRef = useRef([]);
@@ -144,7 +143,7 @@ const Meet = (props) => {
   }
 
   useEffect(() => {
-    if (name!=="")
+    if (name !== "")
       startStream()
   }, [])
 
@@ -154,7 +153,7 @@ const Meet = (props) => {
       peer.peer.on("stream", (stream) => {
         userScreenStreams.current.push({ peerID: peer.peerID, stream })
         i++;
-        if (i===screenSharesRef.current.length && !screenSharingEnabledRef.current) {
+        if (i === screenSharesRef.current.length && !screenSharingEnabledRef.current) {
           socketRef.current.emit("screen streaming running for new user", { roomID })
         }
       })
@@ -181,21 +180,22 @@ const Meet = (props) => {
   }, [userUpdate])
 
 
-    window.onbeforeunload = function () {
-      stopMediaRecorder()
-          socketRef.current.emit("disconnectMeet", { name, roomID })
-          // For delay if recording is going on and user refreshes or closes tab, which will lead to saving of file
-          // SetTimeout doesn't work in onBeforeUnload
-          if(mediaRecorder.current)
-          for(var i = 0; i < 1000; i++){
-            ;
-          }
-    }
+  window.onbeforeunload = function () {
+    stopMediaRecorder()
+    socketRef.current.emit("disconnectMeet", { name, roomID, userId: userId })
+    stopTranscripting()
+    // For delay if recording is going on and user refreshes or closes tab, which will lead to saving of file
+    // SetTimeout doesn't work in onBeforeUnload
+    if (mediaRecorder.current)
+      for (var i = 0; i < 1000; i++) {
+        ;
+      }
+  }
 
   const disconnectMeet = () => {
     stopMediaRecorder()
-    socketRef.current.emit("disconnectMeet", { name, roomID })
-    // stopTranscripting()
+    socketRef.current.emit("disconnectMeet", { name, roomID, userId })
+    stopTranscripting()
     setTranscripts([])
     transcriptsRef.current = []
     setTimeout(() => {
@@ -206,27 +206,27 @@ const Meet = (props) => {
 
   const startStream = () => {
     setIsOpen(false)
-    if(socket){
-      socketRef.current=socket
+    if (socket) {
+      socketRef.current = socket
       createStream();
       startChat()
     }
-    else{
+    else {
       var socketNew = io.connect(`${url}`)
-      socketNew.on('connect',()=>{
+      socketNew.on('connect', () => {
         axios({
           url: `${url}/updateSocket`,
           method: 'POST',
           headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${localStorage.getItem('TeamsToken')}`
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('TeamsToken')}`
           },
           data: {
-              "socketId": socketNew.id
+            "socketId": socketNew.id
           }
-      }).then(data => {
+        }).then(data => {
           console.log(data)
-      })
+        })
         socketRef.current = socketNew;
         setSocket(socketNew)
         createStream();
@@ -272,7 +272,7 @@ const Meet = (props) => {
           socketRef.current.emit("screen stream update", { updateStream: false, roomID, name })
 
         };
-      }).catch(err=>{
+      }).catch(err => {
         toast.error(`Your device doesn't support screen share`, {
           position: "top-left",
           hideProgressBar: true
@@ -303,7 +303,7 @@ const Meet = (props) => {
 
 
   const sendMessage = (sendMessage) => {
-    const payload = { name, message: sendMessage, senderId: socketRef.current.id,id, roomID };
+    const payload = { name, message: sendMessage, senderId: socketRef.current.id, userId, roomID };
     socketRef.current.emit("send message", payload);
     chatsRef.current = [...chatsRef.current, { name: "You", message: payload.message }]
     const chatsUpdated = chatsRef.current;
@@ -312,122 +312,137 @@ const Meet = (props) => {
   }
 
 
-  // const accessToken = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IlFVUTRNemhDUVVWQk1rTkJNemszUTBNMlFVVTRRekkyUmpWQ056VTJRelUxUTBVeE5EZzFNUSJ9.eyJodHRwczovL3BsYXRmb3JtLnN5bWJsLmFpL3VzZXJJZCI6IjYxOTczNjE4MjA4Mjc2NDgiLCJpc3MiOiJodHRwczovL2RpcmVjdC1wbGF0Zm9ybS5hdXRoMC5jb20vIiwic3ViIjoiSzlqcGxETnByaXJIZ3I5bGVnVjV6amNmcDRBb1RHRVVAY2xpZW50cyIsImF1ZCI6Imh0dHBzOi8vcGxhdGZvcm0ucmFtbWVyLmFpIiwiaWF0IjoxNjI0OTUyNTgyLCJleHAiOjE2MjUwMzg5ODIsImF6cCI6Iks5anBsRE5wcmlySGdyOWxlZ1Y1empjZnA0QW9UR0VVIiwiZ3R5IjoiY2xpZW50LWNyZWRlbnRpYWxzIn0.1duye6C7CdWhzRpJ2u5e7H2UAzJdR5tPU4PkjcnM696E9ha7mNlL6ZFMU_jWMXYzxGmLNADVes-GYHdTIzYwpYzcAcIv6jXZtn61SbyhWx5QRGBw0OwcYQx-tBBwrCHlUpnYutTWit6FbOzfJ_GO72NkbTeM9icvOUoJOxw7RfaPBZAMJZlCfvb7gD4tEfrr7UhvhK6YJRznip3LSAm3I_rc69TUdEyKkTURyzyELl8AoiGlu_ksC7XBRQbl1rKBy264HeIa0Lg9D_A2a-bo5ynv2tdko2yJoPfZrtLOL5jfnArMlYVrz6ZGWCXHbHsd5_WM5TbDQ074H-fPR8pbJA"
-  // const uniqueMeetingId = btoa(roomID)
-  // const symblEndpoint = `wss://api.symbl.ai/v1/realtime/insights/${uniqueMeetingId}?access_token=${accessToken}`;
-  // const ws = new WebSocket(symblEndpoint);
 
-  // const startTranscripting = ({ stream, roomID, socketRef, name }) => {
-  //   // Fired when a message is received from the WebSocket server
-  //   ws.onmessage = (event) => {
-  //     // You can find the conversationId in event.message.data.conversationId;
-  //     const data = JSON.parse(event.data);
-  //     if (data.type === 'message' && data.message.hasOwnProperty('data')) {
-  //       console.log('conversationId', data.message.data.conversationId);
-  //     }
-  //     if (data.type === 'message_response') {
-  //       var messagesConcatenation = "";
-  //       for (let message of data.messages) {
-  //         console.log('Transcript (more accurate): ', message.payload.content);
-  //         messagesConcatenation = messagesConcatenation + message.payload.content;
-  //       }
-  //       transcriptsRef.current=[...transcriptsRef.current,{ name: 'You', message: messagesConcatenation }]
-  //       console.log(transcriptsRef.current)
-  //       setTranscripts(transcriptsRef.current)
-  //       socketRef.current.emit("transcript data send",{roomID,name: name, message: messagesConcatenation})
-  //     }
-  //     if (data.type === 'topic_response') {
-  //       for (let topic of data.topics) {
-  //         // console.log('Topic detected: ', topic.phrases)
-  //       }
-  //     }
-  //     if (data.type === 'insight_response') {
-  //       for (let insight of data.insights) {
-  //         console.log('Insight detected: ', insight.payload.content);
-  //       }
-  //     }
-  //     if (data.type === 'message' && data.message.hasOwnProperty('punctuated')) {
-  //       console.log('Live transcript (less accurate): ', data.message.punctuated.transcript)
-  //     }
-  //     console.log(`Response type: ${data.type}. Object: `, data);
-  //   };
+  var accessToken=null;
+  var uniqueMeetingId;
+  var symblEndpoint;
+  var ws;
 
-  //   // Fired when the WebSocket closes unexpectedly due to an error or lost connetion
-  //   ws.onerror = (err) => {
-  //     console.error(err);
-  //   };
+  const startLoadingTranscript=(transcriptStream)=>{
+  {
+      console.log('running')
+      axios(
+        {
+          url: `${url}/transcriptToken`,
+          method: 'GET'
+        }).then(data => {
+          console.log(data)
+          accessToken = data.data.accessToken
+          uniqueMeetingId = btoa(roomID)
+          symblEndpoint = `wss://api.symbl.ai/v1/realtime/insights/${uniqueMeetingId}?access_token=${accessToken}`;
+          ws = new WebSocket(symblEndpoint);
+          startTranscripting({ stream:transcriptStream, roomID, socketRef, name })
+        })
+    }
+  }
 
-  //   // Fired when the WebSocket connection has been closed
-  //   ws.onclose = (event) => {
-  //     console.info('Connection to websocket closed');
-  //   };
+  const startTranscripting = ({ stream, roomID, socketRef, name }) => {
+    // Fired when a message is received from the WebSocket server
+    ws.onmessage = (event) => {
+      // You can find the conversationId in event.message.data.conversationId;
+      const data = JSON.parse(event.data);
+      if (data.type === 'message' && data.message.hasOwnProperty('data')) {
+        console.log('conversationId', data.message.data.conversationId);
+      }
+      if (data.type === 'message_response') {
+        var messagesConcatenation = "";
+        for (let message of data.messages) {
+          console.log('Transcript (more accurate): ', message.payload.content);
+          messagesConcatenation = messagesConcatenation + message.payload.content;
+        
+        transcriptsRef.current = [...transcriptsRef.current, { name: message.from.userId==userId?'You':message.from.name, message: message.payload.content }]
+        console.log(transcriptsRef.current)
+        setTranscripts(transcriptsRef.current)
+        }
+      }
+      if (data.type === 'topic_response') {
+        for (let topic of data.topics) {
+          // console.log('Topic detected: ', topic.phrases)
+        }
+      }
+      if (data.type === 'insight_response') {
+        for (let insight of data.insights) {
+          console.log('Insight detected: ', insight.payload.content);
+        }
+      }
+      if (data.type === 'message' && data.message.hasOwnProperty('punctuated')) {
+        console.log('Live transcript (less accurate): ', data.message.punctuated.transcript)
+      }
+      console.log(`Response type: ${data.type}. Object: `, data);
+    };
 
-  //   // Fired when the connection succeeds.
-  //   ws.onopen = (event) => {
-  //     toast.dark("Transcript is ON")
-  //     ws.send(JSON.stringify({
-  //       type: 'start_request',
-  //       meetingTitle: 'Websockets How-to', // Conversation name
-  //       insightTypes: ['question', 'action_item'], // Will enable insight generation
-  //       config: {
-  //         confidenceThreshold: 0.5,
-  //         languageCode: 'en-US',
-  //         speechRecognition: {
-  //           encoding: 'LINEAR16',
-  //           sampleRateHertz: 44100,
-  //         }
-  //       },
-  //       speaker: {
-  //         userId: socketRef.current.id,
-  //         name: name,
-  //       }
-  //     }));
-  //   };
+    // Fired when the WebSocket closes unexpectedly due to an error or lost connetion
+    ws.onerror = (err) => {
+      console.error(err);
+    };
 
-  //   /**
-  //    * The callback function which fires after a user gives the browser permission to use
-  //    * the computer's microphone. Starts a recording session which sends the audio stream to
-  //    * the WebSocket endpoint for processing.
-  //    */
-  //   const handleSuccess = (stream) => {
-  //     const AudioContext = window.AudioContext;
-  //     const context = new AudioContext();
-  //     const source = context.createMediaStreamSource(stream);
-  //     const processor = context.createScriptProcessor(1024, 1, 1);
-  //     const gainNode = context.createGain();
-  //     source.connect(gainNode);
-  //     gainNode.connect(processor);
-  //     processor.connect(context.destination);
-  //     processor.onaudioprocess = (e) => {
-  //       // convert to 16-bit payload
-  //       const inputData = e.inputBuffer.getChannelData(0) || new Float32Array(this.bufferSize);
-  //       const targetBuffer = new Int16Array(inputData.length);
-  //       for (let index = inputData.length; index > 0; index--) {
-  //         targetBuffer[index] = 32767 * Math.min(1, inputData[index]);
-  //       }
-  //       // Send audio stream to websocket.
-  //       if (ws.readyState === WebSocket.OPEN) {
-  //         ws.send(targetBuffer.buffer);
-  //       }
-  //     };
-  //   };
+    // Fired when the WebSocket connection has been closed
+    ws.onclose = (event) => {
+      console.info('Connection to websocket closed');
+    };
+
+    // Fired when the connection succeeds.
+    ws.onopen = (event) => {
+      toast.dark("Transcript is ON")
+      ws.send(JSON.stringify({
+        type: 'start_request',
+        meetingTitle: 'Websockets How-to', // Conversation name
+        insightTypes: ['question', 'action_item'], // Will enable insight generation
+        config: {
+          confidenceThreshold: 0.5,
+          languageCode: 'en-US',
+          speechRecognition: {
+            encoding: 'LINEAR16',
+            sampleRateHertz: 44100,
+          }
+        },
+        speaker: {
+          userId: userId,
+          name: name,
+        }
+      }));
+    };
+
+    /**
+     * The callback function which fires after a user gives the browser permission to use
+     * the computer's microphone. Starts a recording session which sends the audio stream to
+     * the WebSocket endpoint for processing.
+     */
+    const handleSuccess = (stream) => {
+      const AudioContext = window.AudioContext;
+      const context = new AudioContext();
+      const source = context.createMediaStreamSource(stream);
+      const processor = context.createScriptProcessor(1024, 1, 1);
+      const gainNode = context.createGain();
+      source.connect(gainNode);
+      gainNode.connect(processor);
+      processor.connect(context.destination);
+      processor.onaudioprocess = (e) => {
+        // convert to 16-bit payload
+        const inputData = e.inputBuffer.getChannelData(0) || new Float32Array(this.bufferSize);
+        const targetBuffer = new Int16Array(inputData.length);
+        for (let index = inputData.length; index > 0; index--) {
+          targetBuffer[index] = 32767 * Math.min(1, inputData[index]);
+        }
+        // Send audio stream to websocket.
+        if (ws.readyState === WebSocket.OPEN) {
+          ws.send(targetBuffer.buffer);
+        }
+      };
+    };
 
 
-  //   handleSuccess(stream);
-  // }
+    handleSuccess(stream);
+  }
 
-  // const stopTranscripting =() =>{
-  //   // const interval = setInterval(function() {
-  //   //   if (ws.bufferedAmount===0){
-  //       // ws.send(JSON.stringify({
-  //       //   type: 'stop_request'
-  //       // }));
-  //       ws.close()
-  //       toast.dark("Transcript stopped !")
-  // //       clearInterval(interval)
-  // //     }
-  // // }, 50); 
-  // }
+  const stopTranscripting = () => {
+    
+    if(ws)
+    {
+    ws.close()
+    toast.dark("Transcript stopped !")
+    }
+  }
 
   function createStream() {
     MediaInit({ camera, mic, hostRef, setStream }).then((stream) => {
@@ -455,12 +470,12 @@ const Meet = (props) => {
         )
       }
       // if(mic)
-      // startTranscripting({ stream, name, roomID, socketRef })
+      startLoadingTranscript(hostRef.current.srcObject)
 
       var options = { audio: mic, video: camera }
-      socketRef.current.emit("join room", { roomID, options, name });
+      socketRef.current.emit("join room", { roomID, options, name, userId: userId });
       socketRef.current.on("all users", (users) => {
-        
+
         const peers = [];
         users.forEach((userID) => {
           const peer = createPeer(userID.id, socketRef.current.id, stream, options, name);
@@ -480,7 +495,7 @@ const Meet = (props) => {
           });
           toast.dark(`${userID.name} is already present`, {
             position: "top-left",
-            hideProgressBar: false
+            hideProgressBar: true,
           });
         });
         setPeers(peers);
@@ -533,17 +548,17 @@ const Meet = (props) => {
 
       socketRef.current.on("user left", ({ id, name }) => {
         peersRef.current.filter((p) => {
-          if (p.peerID===id) {
+          if (p.peerID === id) {
             p.destroyed = true;
             p.peer.destroy();
-            if (name===undefined)
+            if (name === undefined)
               toast.dark(`${p.name} has left`, {
                 position: "top-left",
                 hideProgressBar: false
               });
           }
         });
-        if (name!==undefined)
+        if (name !== undefined)
           toast.dark(`${name} has left`, {
             position: "top-left",
             hideProgressBar: false
@@ -580,7 +595,7 @@ const Meet = (props) => {
 
         const index = screenSharesRef.current.findIndex((p) => p.peerID === id);
 
-        if (index!==-1) {
+        if (index !== -1) {
           if (screenSharesRef.current[index]) {
             screenSharesRef.current[index].peer.destroy();
           }
@@ -600,7 +615,7 @@ const Meet = (props) => {
         if (payload.updateStream) {
           setScreenSharingEnabled({ enabled: true, presenter: payload.id })
           screenSharingEnabledRef.current = true
-          const peer = userScreenStreams.current.find((peer) => peer.peerID===payload.id + "-screen-share");
+          const peer = userScreenStreams.current.find((peer) => peer.peerID === payload.id + "-screen-share");
           screenStreamComponent.current.srcObject = peer.stream;
           toast.dark(`${payload.name} started screen sharing`, {
             position: "top-left",
@@ -617,14 +632,10 @@ const Meet = (props) => {
         }
       })
 
-      socketRef.current.on("receive transcript", (payload) => {
-        transcriptsRef.current = [...transcriptsRef.current, { name: payload.name, message: payload.message }]
-        setTranscripts(transcriptsRef.current)
-      })
 
     }).catch(err => {
-      toast.error('Devices not working properly',{
-        position:'top-left'
+      toast.error('Devices not working properly', {
+        position: 'top-left'
       })
       console.log(err)
     })
@@ -716,11 +727,11 @@ const Meet = (props) => {
 
           socketRef.current.emit("change", {
             id: socketRef.current.id,
-            video: kind==="video" ? !camera : camera,
-            audio: kind==="audio" ? !mic : mic,
+            video: kind === "video" ? !camera : camera,
+            audio: kind === "audio" ? !mic : mic,
             roomID
           });
-          track.enabled = kind==="audio" ? !mic : !camera;
+          track.enabled = kind === "audio" ? !mic : !camera;
         }
         Toggler(state, setState)
       })
@@ -743,13 +754,13 @@ const Meet = (props) => {
     var audios = [];
     var dest = audioContext.createMediaStreamDestination();
     for (let video in Array.from(videos)) {
-      if (videos[video].id!=='user-own-video') {
-        if(videos[video].srcObject.getAudioTracks().length!=0)
-        audioContext.createMediaStreamSource(videos[video].srcObject).connect(dest)
+      if (videos[video].id !== 'user-own-video') {
+        if (videos[video].srcObject.getAudioTracks().length != 0)
+          audioContext.createMediaStreamSource(videos[video].srcObject).connect(dest)
       }
       else {
-        if(hostRef.current.srcObject.getAudioTracks().length!=0)
-        audioContext.createMediaStreamSource(hostRef.current.srcObject).connect(dest)
+        if (hostRef.current.srcObject.getAudioTracks().length != 0)
+          audioContext.createMediaStreamSource(hostRef.current.srcObject).connect(dest)
       }
     }
 
@@ -768,7 +779,7 @@ const Meet = (props) => {
     mediaRecorder.current.start();
 
     function handleDataAvailable(event) {
-      
+
       if (event.data.size > 0) {
         recordedChunks.chunks.push(event.data);
         setRecordedChunks({ enabled: recordedChunks.enabled, chunks: [...recordedChunks.chunks] })
@@ -881,9 +892,6 @@ const Meet = (props) => {
         <div className="meet-icons">
           <img src={MicrosoftTeams}
             className="meet-teams-logo"
-            onClick={() => {
-              window.location = "/"
-            }}
           />
           <div className="meet-top-option-box">
             <div className="other-options">
@@ -909,7 +917,7 @@ const Meet = (props) => {
                     }} checked={customBackground} />
                 </li>
                 <li onClick={() => {
-                  if (screenSharingEnabled.enabled && screenSharingEnabled.presenter!==socketRef.current.id)
+                  if (screenSharingEnabled.enabled && screenSharingEnabled.presenter !== socketRef.current.id)
                     return toast.dark("Only presenter can record screen", {
                       position: 'top-left'
                     })
@@ -949,20 +957,20 @@ const Meet = (props) => {
                 className="screen-share"
               /> :
               <Icon icon={shareScreenStop20Filled}
-                data-tip={socketRef.current && screenSharingEnabled.presenter===socketRef.current.id
+                data-tip={socketRef.current && screenSharingEnabled.presenter === socketRef.current.id
                   ?
                   'Stop Screen Share'
                   : 'Only presenter can stop screen sharing'
                 }
                 onClick={
 
-                  socketRef.current && screenSharingEnabled.presenter===socketRef.current.id
+                  socketRef.current && screenSharingEnabled.presenter === socketRef.current.id
                     ?
                     screenShare
                     :
                     null
                 }
-                className={`screen-share ${socketRef.current && screenSharingEnabled.presenter!==socketRef.current.id
+                className={`screen-share ${socketRef.current && screenSharingEnabled.presenter !== socketRef.current.id
                   ?
                   'screen-share-disabled'
                   :
@@ -995,7 +1003,7 @@ const Meet = (props) => {
 
           <div className="screen-share-box" style={{ display: screenSharingEnabled.enabled ? 'flex' : 'none' }}>
             <video ref={screenStreamComponent}
-              muted={socketRef.current && screenSharingEnabled.presenter===socketRef.current.id}
+              muted={socketRef.current && screenSharingEnabled.presenter === socketRef.current.id}
               playsInline id="share-screen-user"
               autoPlay />
           </div>
@@ -1034,6 +1042,7 @@ const Meet = (props) => {
                   <Icon
                     icon={micIcon}
                     className="meet-controllers"
+                    data-tip="close mic"
                     onClick={() => {
 
                       ToggleState("audio", mic, setMic)
@@ -1043,24 +1052,27 @@ const Meet = (props) => {
                   <Icon
                     icon={micMute}
                     className="meet-controllers"
+                    data-tip="open mic"
                     onClick={() => {
 
                       ToggleState("audio", mic, setMic)
 
                     }} />
               }
-              <Icon
-                className="meet-controllers"
-                icon={phoneOff}
-                onClick={disconnectMeet}
-              />
-
+              <div className="disconnect-meet">
+                <Icon
+                  className="meet-controllers"
+                  icon={phoneOff}
+                  onClick={disconnectMeet}
+                />
+              </div>
               {
                 camera
                   ?
                   <Icon
                     icon={cameraVideo}
                     className="meet-controllers"
+                    data-tip="close camera"
                     onClick={() => {
                       ToggleState("video", camera, setCamera)
 
@@ -1069,6 +1081,7 @@ const Meet = (props) => {
                   <Icon
                     icon={cameraVideoOff}
                     className="meet-controllers"
+                    data-tip="open camera"
                     onClick={() => {
                       ToggleState("video", camera, setCamera)
 
@@ -1097,7 +1110,7 @@ const mapStateToProps = state => {
     videoDevices: state.userDetails.videoDevices,
     audioDevices: state.userDetails.audioDevices,
     socket: state.userDetails.socket,
-    id: state.userDetails.id
+    userId: state.userDetails.userId
   }
 }
 
@@ -1106,7 +1119,7 @@ const mapDispatchToProps = dispatch => {
     setUserId: data => {
       dispatch({
         type: 'SET_USER_ID',
-        id: data,
+        userId: data,
       })
     },
     setEmail: data => {

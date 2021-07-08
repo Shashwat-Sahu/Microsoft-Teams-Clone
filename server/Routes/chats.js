@@ -4,6 +4,31 @@ const mongoose = require('mongoose')
 const requiredLogin = require("../middleware/requireLogin")
 const Room = mongoose.model('Room');
 const User = mongoose.model('User');
+const request = require('request')
+
+router.get("/transcriptToken",(req,res)=>{
+
+
+const authOptions = {
+  method: 'post',
+  url: "https://api.symbl.ai/oauth2/token:generate",
+  body: {
+    type: "application",
+    appId: process.env.appId,
+    appSecret: process.env.appSecret
+  },
+  json: true
+};
+
+request(authOptions, (err, response, body) => {
+  if (err) {
+    console.error('error posting json: ', err);
+    throw err
+  }
+  res.send(body)
+  console.log(JSON.stringify(body, null, 2));
+});
+})
 
 router.get("/getChats",requiredLogin,(req,res)=>{
     
@@ -49,7 +74,6 @@ router.post("/createRoom",requiredLogin,(req,res)=>{
         }).then(data=>{
 
         
-        console.log(data)
         res.send(room)
     })
     })
@@ -82,7 +106,6 @@ router.post("/joinRoom",requiredLogin,(req,res)=>{
         }).then(data=>{
 
         
-        console.log(data)
         res.send(room)
     })
     })
@@ -93,7 +116,6 @@ router.post("/updateSocket",requiredLogin,(req,res)=>{
     const roomsID = req.user.rooms.filter(room=>{
         return room;
     })
-    console.log(req.body)
     const result = roomsID.map(roomID=>
      Room.findOneAndUpdate({roomID:roomID,'roomPresentUsers.userId':req.user._id},{
         $set:{
@@ -102,7 +124,6 @@ router.post("/updateSocket",requiredLogin,(req,res)=>{
     },{
         new:true
     }).then(room=>{
-        console.log(room)
         return room
     })
 

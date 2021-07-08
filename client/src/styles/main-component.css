@@ -68,8 +68,7 @@
 .main-chat-pro-content{
     overflow: auto;
     height: 100%;
-    /* background-color: rgb(243, 237, 237); */
-    background-image: url('https://images.hdqwalls.com/wallpapers/simple-subtle-abstract-dark-minimalism-4k-u9.jpg');
+    background: linear-gradient(-45deg, rgb(48, 67, 128), rgb(23,23,23));
     background-size: cover;
 
 }
@@ -158,6 +157,7 @@
     display: flex;
     flex-direction: row;
     place-items: center;
+    justify-content: space-between;
 }
 .main-chat-chats-box-footer input{
     color: black;
@@ -168,8 +168,10 @@
     cursor: pointer;
 }
 .room-join-options{
+    width: 150px;
     position: absolute;
-    left: -115px;
+    left: -150px;
+    top: 8px;
     background-color: rgb(8, 139, 100);
     list-style: none;
     z-index: 1011;
@@ -203,6 +205,10 @@
 border-bottom: 1px solid #aaa;
 font-size: 0.5em;
 padding: 10px;
+display: flex;
+flex-direction: row;
+place-items: center;
+justify-content: space-between;
 }
 .room-join-options li:last-child{
     border-bottom: none;
@@ -290,6 +296,9 @@ padding: 10px;
     padding: 7px;
     min-width: 150px;
     
+}
+.chat-user-name{
+    color: #0f9b9b;
 }
 .chat-user-message{
     word-wrap: break-word;

@@ -19,14 +19,14 @@ const Routing = (props) => {
     var roomIdFormat = /[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}/;
     if (roomIdFormat.test(urlArray[urlArray.length - 1])) {
       setJoiningRoom(urlArray[urlArray.length - 1])
-      const path = urlArray.find(ele => ele == 'home' || ele == 'teams')
+      const path = urlArray.find(ele => ele === 'home' || ele === 'teams')
       if (path)
         setJoiningPath(path)
       history.push("/")
     }
     else if (roomIdFormat.test(urlArray[urlArray.length - 2])) {
       setJoiningRoom(urlArray[urlArray.length - 2])
-      const path = urlArray.find(ele => ele == 'home' || ele == 'teams')
+      const path = urlArray.find(ele => ele === 'home' || ele === 'teams')
       if (path)
         setJoiningPath(path)
       history.push("/")

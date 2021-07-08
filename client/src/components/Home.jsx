@@ -30,10 +30,6 @@ const Home = (props) => {
     setCamera,
     setStream,
     stream,
-    name,
-    setName,
-    email,
-    setEmail,
     setAudioDevices,
     setVideoDevices
   } = props;

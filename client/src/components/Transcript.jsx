@@ -1,15 +1,13 @@
-import React, { useEffect, useState,useRef } from 'react'
+import React from 'react'
 import { Icon } from '@iconify/react';
-import sendFilled from '@iconify/icons-carbon/send-filled';
 import "../styles/transcript.css"
 import arrowLeft from '@iconify/icons-akar-icons/arrow-left';
-import { ProSidebar, SidebarHeader, SidebarFooter, SidebarContent } from 'react-pro-sidebar';
+import { ProSidebar, SidebarHeader, SidebarContent } from 'react-pro-sidebar';
 import 'react-pro-sidebar/dist/css/styles.css';
 
 
 
 const Transcript = ({  transcriptsRef, openTranscripts, setOpenTranscripts }) => {
-  const [message, setMessage] = useState('') 
 
 
   return (

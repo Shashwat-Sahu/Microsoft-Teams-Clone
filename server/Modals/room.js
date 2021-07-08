@@ -22,7 +22,11 @@ const roomSchema = new mongoose.Schema({
     options:{
         video:Boolean,
         audio:Boolean
-    }
+    },
+    userId:{
+        type:String,
+        required:true
+    },
 }
 ]
 ,

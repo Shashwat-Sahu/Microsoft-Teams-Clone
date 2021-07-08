@@ -16,7 +16,9 @@ import menuIcon from '@iconify/icons-carbon/menu';
 import desktopArrowRight24Regular from '@iconify/icons-fluent/desktop-arrow-right-24-regular';
 import bxLogOut from '@iconify/icons-bx/bx-log-out';
 import ReactTooltip from 'react-tooltip';
+import joinOuter from '@iconify/icons-carbon/join-outer';
 import { prodUrl as url } from "../Config/config.json"
+import bxsAddToQueue from '@iconify/icons-bx/bxs-add-to-queue';
 
 const MainComponent = (props) => {
     const {
@@ -24,7 +26,7 @@ const MainComponent = (props) => {
         setSocket,
         name,
         setName,
-        id,
+        userId,
         setUserId,
         setAuth,
         joiningRoom,
@@ -42,7 +44,7 @@ const MainComponent = (props) => {
     const [modalIsOpen, setmodalIsOpen] = useState(false)
     const [modalCreateRoomIsOpen, setmodalCreateRoomIsOpen] = useState(false)
     const [roomName, setRoomName] = useState('')
-    const [roomSideBar, setRoomSideBar] = useState(true)
+    const [roomSideBar, setRoomSideBar] = useState(window.screen.width > 660)
     const messagesEndRef = useRef(null)
     const history = useHistory()
     const [customBackground, setCustomBackground] = useState(false)
@@ -64,7 +66,7 @@ const MainComponent = (props) => {
     };
 
 
-    useEffect(async () => {
+    useEffect(() => {
         if (joiningRoom && socket != null) {
             joinRoom(joiningRoom)
 
@@ -104,6 +106,7 @@ const MainComponent = (props) => {
             }
         }).then(data => {
             setName(data.data.user.name)
+            console.log(data.data.user._id)
             setUserId(data.data.user._id)
             roomsRef.current = roomsRef.current.concat(data.data.rooms)
             setRooms(roomsRef.current)
@@ -120,12 +123,12 @@ const MainComponent = (props) => {
             }
             socket.on("receivedMessage", (payload) => {
 
-                const { name, message, id, roomID } = payload
+                const { name, message, userId, roomID } = payload
 
                 if (roomRef.current && roomRef.current.roomID == roomID) {
                     var roomUpdate = roomRef.current
                     console.log(roomRef.current)
-                    roomUpdate.chats = [...roomUpdate.chats, { name, message, userId: id }]
+                    roomUpdate.chats = [...roomUpdate.chats, { name, message, userId: userId }]
                     roomRef.current = roomUpdate
                     console.log(roomRef.current)
                     setChats(roomUpdate.chats)
@@ -133,7 +136,7 @@ const MainComponent = (props) => {
                 }
                 for (var i = 0; i < roomsRef.current.length; i++) {
                     if (roomsRef.current[i].roomID == roomID) {
-                        roomsRef.current[i].chats = [...roomsRef.current[i].chats, { name, message, userId: id }]
+                        roomsRef.current[i].chats = [...roomsRef.current[i].chats, { name, message, userId: userId }]
                     }
                 }
                 // roomsRef.current = roomsUpdate
@@ -232,11 +235,11 @@ const MainComponent = (props) => {
             setRoomSideBar(false)
     }
     const sendMessage = (sendMessage) => {
-        const payload = { name, message: sendMessage, id: id, roomID: room.roomID };
+        const payload = { name, message: sendMessage, userId: userId, roomID: room.roomID };
         socket.emit("send message", payload);
         const roomUpdate = roomRef.current;
         const chatUpdate = chats;
-        chatUpdate.push({ name, message, userId: id })
+        chatUpdate.push({ name, message, userId: userId })
         roomUpdate.chats = chatUpdate
         for (var i = 0; i < roomsRef.current.length; i++)
             if (roomsRef.current[i].roomID == room.roomID) {
@@ -336,11 +339,17 @@ const MainComponent = (props) => {
                         <ul className="room-join-options">
                             <li onClick={() => {
                                 setmodalCreateRoomIsOpen(true)
-                            }}>Create Room</li>
+                            }}>
+                                <Icon icon={bxsAddToQueue} /><span>Create Room</span></li>
                             <li
                                 onClick={() => {
                                     setmodalIsOpen(true)
-                                }}>Join Room</li>
+                                }}>
+                                <Icon icon={joinOuter} />
+                                <span>
+                                    Join Room
+                                </span>
+                            </li>
                         </ul>
 
                     </span>
@@ -446,13 +455,13 @@ const MainComponent = (props) => {
                     <SidebarContent className="main-chat-chats-box-content">
                         {chats.map(chat => {
                             return (
-                                <div className="sidebar-room-chat" id={chat.userId == id ? 'shiftChat' : null}>
+                                <div className="sidebar-room-chat" id={chat.userId == userId ? 'shiftChat' : null}>
                                     <div className="room-initial-chat" style={{ backgroundColor: '#333' }}>
                                         {chat.name.slice(0, 1).toUpperCase()}
                                     </div>
                                     <div className="chat-user">
                                         <h4 className="chat-user-name">
-                                            {chat.userId == id ? 'You' : chat.name}
+                                            {chat.userId == userId ? 'You' : chat.name}
                                         </h4>
                                         <div className="chat-user-message">
                                             {chat.message}
@@ -507,7 +516,7 @@ const mapStateToProps = state => {
     return {
         name: state.userDetails.name,
         socket: state.userDetails.socket,
-        id: state.userDetails.id,
+        userId: state.userDetails.userId,
         joiningRoom: state.userDetails.joiningRoom,
         joiningPath: state.userDetails.joiningPath,
     }
@@ -531,7 +540,7 @@ const mapDispatchToProps = dispatch => {
         setUserId: data => {
             dispatch({
                 type: 'SET_USER_ID',
-                id: data,
+                userId: data,
             })
         },
         setAuth: data => {

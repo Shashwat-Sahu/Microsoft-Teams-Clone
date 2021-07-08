@@ -1,8 +1,7 @@
-import React, { useEffect, useState } from 'react'
+import React, {  useState } from 'react'
 import { Icon } from '@iconify/react';
 import sendFilled from '@iconify/icons-carbon/send-filled';
 import "../styles/chat.css"
-import arrowDown from '@iconify/icons-akar-icons/arrow-down';
 import arrowRight from '@iconify/icons-akar-icons/arrow-right';
 import { ProSidebar, SidebarHeader, SidebarFooter, SidebarContent } from 'react-pro-sidebar';
 import 'react-pro-sidebar/dist/css/styles.css';
@@ -30,7 +29,7 @@ const Chats = ({ chats, sendMessage, openChat, setOpenChat }) => {
       {
         chats.map((chat, index) => {
           return(
-          <div className={`chat-wrapper ${chat.name=="You"?"chat-wrapper-user":null}`}>
+          <div className={`chat-wrapper ${chat.name==="You"?"chat-wrapper-user":null}`}>
             <div className="chat-member-name">
               {chat.name}
             </div>
@@ -49,7 +48,7 @@ const Chats = ({ chats, sendMessage, openChat, setOpenChat }) => {
           className="chatEntry"
           onKeyPress={(e)=>{
             e = e || window.event;
-            if(e.key=="Enter")
+            if(e.key==="Enter")
             {
                 sendMessage(message);
                 setMessage("")

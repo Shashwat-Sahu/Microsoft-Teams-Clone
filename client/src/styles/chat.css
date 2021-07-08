@@ -16,8 +16,7 @@
 }
 .chat-wrapper{
     margin: 5px;
-    /* background-color: #C4BCBC; */
-    border: 1px solid #757373;
+    background-color: #333;
     border-radius: 12px;
     padding: 5px;
     width:80%;

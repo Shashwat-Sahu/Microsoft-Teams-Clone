@@ -88,7 +88,7 @@ const SignIn = (props) => {
           </button>
         </div>
       </div>
-      <img src={Group_Connect} className="signin-bottom-vector" />
+      <img src={Group_Connect}  alt="group connect" className="signin-bottom-vector" />
     </div>
     <ToastContainer/>
 </>

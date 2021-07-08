@@ -35,25 +35,9 @@ app.use(require("./Routes/chats"));
 const mongoose = require('mongoose');
 const Room = mongoose.model('Room');
 
-// const authOptions = {
-//   method: 'post',
-//   url: "https://api.symbl.ai/oauth2/token:generate",
-//   body: {
-//     type: "application",
-//     appId: "4b396a706c444e70726972486772396c656756357a6a63667034416f54474555",
-//     appSecret: "77556671304d516d623053654c626673624d4e526a4d684a42413154516f5a666c4d444b686e4e34725a6341585778723673555a325877576f73353967726661"
-//   },
-//   json: true
-// };
 
-// request(authOptions, (err, res, body) => {
-//   if (err) {
-//     console.error('error posting json: ', err);
-//     throw err
-//   }
 
-//   console.log(JSON.stringify(body, null, 2));
-// });
+
 
 
 
@@ -68,6 +52,7 @@ const io = socket(server, {
 });
 require("dotenv").config();
 const path = require("path");
+const { route } = require("./Routes/auth");
 
 const users = {};
 
@@ -90,14 +75,15 @@ mongoose.connection.on('error', (err) => {
 
 
 io.on('connection', socket => {
-    socket.on("join room", ({ roomID, options, name }) => {
+    socket.on("join room", ({ roomID, options, name, userId }) => {
         Room.findOneAndUpdate({ roomID: roomID }, {
             $push: {
                 roomUsers:
                 {
                     id: socket.id,
                     name,
-                    options
+                    options,
+                    userId
                 }
             }
         },
@@ -127,26 +113,29 @@ io.on('connection', socket => {
     });
 
 
-    socket.on('disconnectMeet', ({ name, roomID }) => {
-
+    socket.on('disconnectMeet', ({ name, roomID,userId }) => {
+        console.log(userId)
         Room.findOneAndUpdate({ roomID: roomID }, {
             $pull: {
                 roomUsers:
                 {
-                    "id": socket.id
+                    userId:userId
                 }
             }
         },
-            {
-                returnOriginal:false
-            }
+        {
+            multi:true,
+            new:true
+        }
+
         ).then(room => {
+            
             console.log("After left", room)
             console.log(`User ${socket.id} left from room: ${roomID}`);
 
             if (room && room.roomUsers) {
                 room.roomUsers.forEach(user => {
-                    if (socket.id !== user.id) {
+                    if (userId !== user.userId) {
                         io.to(user.id).emit('user left', { id: socket.id, name })
                         io.to(user.id).emit('user left screen stream', socket.id + "-screen-share")
                     }
@@ -154,7 +143,7 @@ io.on('connection', socket => {
                 })
 
             }
-
+        
             // if (room&& (room.roomUsers.length == 0 || (room.roomUsers.length == 1 && room.roomUsers[0].id == socket.id))) {
             //     Room.findOneAndDelete({ roomID: roomID }).then(room => {
             //         console.log("deleted room", room)
@@ -220,7 +209,7 @@ io.on('connection', socket => {
             {
                 $push:{
                     chats:{
-                        userId:payload.id,
+                        userId:payload.userId,
                         name:payload.name,
                         message:payload.message
                     }
@@ -228,7 +217,6 @@ io.on('connection', socket => {
             },{
                 new:true
             }).then(room => {
-            console.log(room)
             if (room && room.roomPresentUsers) {
                 room.roomPresentUsers.forEach(user => {
                     if (socket.id !== user.socketId)
@@ -293,29 +281,14 @@ io.on('connection', socket => {
             }
         })
     })
-    socket.on("transcript data send", (payload) => {
-        Room.findOne({ roomID: payload.roomID }).then(room => {
-            console.log(room)
-            if (room && room.roomUsers) {
-                room.roomUsers.forEach(user => {
-                    if (socket.id !== user.id)
-                        io.to(user.id).emit('receive transcript', payload)
-                })
-            }
-        })
-    })
+
 })
 
 
 
 
 const PORT = process.env.PORT || 8000;
-// if(process.env.PROD){
-//     app.use( express.static(__dirname + '/client/build'));
-//     app.get('*', (request, response) => {
-// 	    response.sendFile(path.join(__dirname, 'client/build/index.html'));
-//     });
-// }
+
 server.listen(PORT, () => {
     console.log(`Server is running on ${PORT}`)
 }

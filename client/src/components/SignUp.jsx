@@ -21,7 +21,7 @@ const Signup = (props) => {
             return toast.error("Email can't be empty")
         if (!name)
             return toast.error("name can't be empty")
-        if (confirmPassword != password)
+        if (confirmPassword !== password)
             return toast.error("Confirm password does'nt match with password")
         var mailformat = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
         var passwordformat = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
@@ -95,7 +95,7 @@ const Signup = (props) => {
 
                     />
                     {
-                        confirmPassword != password &&
+                        confirmPassword !== password &&
                         <h5 style={{ color: 'red' }}>
                             *Confirm password does'nt match with password
                         </h5>
@@ -115,7 +115,7 @@ const Signup = (props) => {
                         </button>
                     </div>
                 </div>
-                <img src={Group_Connect} className="signup-bottom-vector" />
+                <img src={Group_Connect} alt="group connect" className="signup-bottom-vector" />
 
             </div>
             <ToastContainer />

@@ -190,7 +190,18 @@
 .meet-controllers
 {
     color: #fff;
-    font-size: 2em;
+    font-size: 1.8em;
+}
+.disconnect-meet{
+    background-color: rgb(224, 68, 68);
+    width: 43px;
+    height: 43px;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    place-items: center;
+    justify-content: center;
+    box-shadow: 0 0 5px rgb(65, 63, 63);
 }
 .meet-controllers:hover{
     cursor: pointer;
