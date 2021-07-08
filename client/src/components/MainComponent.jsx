@@ -86,10 +86,8 @@ const MainComponent = (props) => {
                         "socketId": socketNew.id
                     }
                 }).then(data => {
-                    console.log(data)
-
+                    ;
                 })
-                console.log(socketNew)
                 setSocket(socketNew)
 
             })
@@ -106,7 +104,6 @@ const MainComponent = (props) => {
             }
         }).then(data => {
             setName(data.data.user.name)
-            console.log(data.data.user._id)
             setUserId(data.data.user._id)
             roomsRef.current = roomsRef.current.concat(data.data.rooms)
             setRooms(roomsRef.current)
@@ -127,10 +124,8 @@ const MainComponent = (props) => {
 
                 if (roomRef.current && roomRef.current.roomID == roomID) {
                     var roomUpdate = roomRef.current
-                    console.log(roomRef.current)
                     roomUpdate.chats = [...roomUpdate.chats, { name, message, userId: userId }]
                     roomRef.current = roomUpdate
-                    console.log(roomRef.current)
                     setChats(roomUpdate.chats)
                     setRoom(roomRef.current)
                 }
@@ -159,7 +154,6 @@ const MainComponent = (props) => {
                 roomName: roomName || undefined
             }
         }).then(data => {
-            console.log(data)
             const roomsUpdate = [...roomsRef.current, data.data]
             roomsRef.current = roomsUpdate
             setRooms(roomsRef.current)
@@ -171,7 +165,6 @@ const MainComponent = (props) => {
     }
 
     const joinRoom = (RoomJoiningID) => {
-        console.log(RoomJoiningID)
 
         if (!RoomJoiningID)
             return toast.error("Room ID can't be empty!")
@@ -191,7 +184,6 @@ const MainComponent = (props) => {
                 socketId: socket.id
             }
         }).then(data => {
-            console.log(data)
             const roomsUpdate = [...roomsRef.current, data.data]
             roomsRef.current = roomsUpdate
             setRooms(roomsRef.current)
@@ -247,7 +239,6 @@ const MainComponent = (props) => {
             }
 
         roomRef.current = roomUpdate
-        console.log(roomsRef.current)
         setChats(chatUpdate)
         setRoom(roomRef.current)
         setRooms(roomsRef.current)

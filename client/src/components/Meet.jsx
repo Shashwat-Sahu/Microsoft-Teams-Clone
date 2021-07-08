@@ -225,7 +225,7 @@ const Meet = (props) => {
             "socketId": socketNew.id
           }
         }).then(data => {
-          console.log(data)
+          ;
         })
         socketRef.current = socketNew;
         setSocket(socketNew)
@@ -320,13 +320,11 @@ const Meet = (props) => {
 
   const startLoadingTranscript=(transcriptStream)=>{
   {
-      console.log('running')
       axios(
         {
           url: `${url}/transcriptToken`,
           method: 'GET'
         }).then(data => {
-          console.log(data)
           accessToken = data.data.accessToken
           uniqueMeetingId = btoa(roomID)
           symblEndpoint = `wss://api.symbl.ai/v1/realtime/insights/${uniqueMeetingId}?access_token=${accessToken}`;
@@ -342,16 +340,15 @@ const Meet = (props) => {
       // You can find the conversationId in event.message.data.conversationId;
       const data = JSON.parse(event.data);
       if (data.type === 'message' && data.message.hasOwnProperty('data')) {
-        console.log('conversationId', data.message.data.conversationId);
+        // console.log('conversationId', data.message.data.conversationId);
       }
       if (data.type === 'message_response') {
         var messagesConcatenation = "";
         for (let message of data.messages) {
-          console.log('Transcript (more accurate): ', message.payload.content);
+          // console.log('Transcript (more accurate): ', message.payload.content);
           messagesConcatenation = messagesConcatenation + message.payload.content;
         
         transcriptsRef.current = [...transcriptsRef.current, { name: message.from.userId==userId?'You':message.from.name, message: message.payload.content }]
-        console.log(transcriptsRef.current)
         setTranscripts(transcriptsRef.current)
         }
       }
@@ -362,13 +359,13 @@ const Meet = (props) => {
       }
       if (data.type === 'insight_response') {
         for (let insight of data.insights) {
-          console.log('Insight detected: ', insight.payload.content);
+          // console.log('Insight detected: ', insight.payload.content);
         }
       }
       if (data.type === 'message' && data.message.hasOwnProperty('punctuated')) {
-        console.log('Live transcript (less accurate): ', data.message.punctuated.transcript)
+        // console.log('Live transcript (less accurate): ', data.message.punctuated.transcript)
       }
-      console.log(`Response type: ${data.type}. Object: `, data);
+      // console.log(`Response type: ${data.type}. Object: `, data);
     };
 
     // Fired when the WebSocket closes unexpectedly due to an error or lost connetion
@@ -383,7 +380,10 @@ const Meet = (props) => {
 
     // Fired when the connection succeeds.
     ws.onopen = (event) => {
-      toast.dark("Transcript is ON")
+      toast.dark("Transcript is ON",{
+        hideProgressBar:true,
+        position:'top-left'
+      })
       ws.send(JSON.stringify({
         type: 'start_request',
         meetingTitle: 'Websockets How-to', // Conversation name
@@ -440,7 +440,10 @@ const Meet = (props) => {
     if(ws)
     {
     ws.close()
-    toast.dark("Transcript stopped !")
+    toast.dark("Transcript stopped !",{
+      hideProgressBar:true,
+      position:'top-left'
+    })
     }
   }
 
@@ -554,14 +557,14 @@ const Meet = (props) => {
             if (name === undefined)
               toast.dark(`${p.name} has left`, {
                 position: "top-left",
-                hideProgressBar: false
+                hideProgressBar: true
               });
           }
         });
         if (name !== undefined)
           toast.dark(`${name} has left`, {
             position: "top-left",
-            hideProgressBar: false
+            hideProgressBar: true
           });
       });
 
@@ -619,7 +622,7 @@ const Meet = (props) => {
           screenStreamComponent.current.srcObject = peer.stream;
           toast.dark(`${payload.name} started screen sharing`, {
             position: "top-left",
-            hideProgressBar: false
+            hideProgressBar: true
           })
         }
         else {
@@ -635,9 +638,10 @@ const Meet = (props) => {
 
     }).catch(err => {
       toast.error('Devices not working properly', {
-        position: 'top-left'
+        position: 'top-left',
+        hideProgressBar: true
       })
-      console.log(err)
+      console.error(err)
     })
   }
 
@@ -737,14 +741,6 @@ const Meet = (props) => {
       })
     }
 
-    // if(!mic) {
-    //   toast.dark("Transcript is loading")
-    //   startTranscripting({ stream, name, roomID, socketRef})
-    // }
-    // else
-    // {
-    //   stopTranscripting()
-    // }
   }
 
   const startMediaRecorder = () => {
@@ -768,7 +764,8 @@ const Meet = (props) => {
 
     setRecordedChunks({ enabled: true, chunks: [...recordedChunks.chunks] })
     toast.info("Screen Recording Started", {
-      position: 'top-left'
+      position: 'top-left',
+      hideProgressBar:true
     })
 
     // add opus in mimeType so that firefox also supports
@@ -802,7 +799,8 @@ const Meet = (props) => {
     window.URL.revokeObjectURL(url);
     setRecordedChunks({ enabled: false, chunks: [] })
     toast.info("Screen Recording Stopped", {
-      position: 'top-left'
+      position: 'top-left',
+      hideProgressBar:true
     })
     mediaRecorder.current = null
   }
@@ -919,7 +917,8 @@ const Meet = (props) => {
                 <li onClick={() => {
                   if (screenSharingEnabled.enabled && screenSharingEnabled.presenter !== socketRef.current.id)
                     return toast.dark("Only presenter can record screen", {
-                      position: 'top-left'
+                      position: 'top-left',
+                      hideProgressBar:true
                     })
                   if (screenSharingEnabled.enabled && recordedChunks.enabled) {
                     stopMediaRecorder()
@@ -929,7 +928,8 @@ const Meet = (props) => {
                   }
                   else {
                     toast.dark("Start Screen Sharing before Recording", {
-                      position: 'top-left'
+                      position: 'top-left',
+                      hideProgressBar:true
                     })
                   }
                 }}>

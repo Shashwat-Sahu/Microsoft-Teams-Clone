@@ -1,4 +1,4 @@
-import React, {  useState } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { Icon } from '@iconify/react';
 import sendFilled from '@iconify/icons-carbon/send-filled';
 import "../styles/chat.css"
@@ -9,9 +9,16 @@ import 'react-pro-sidebar/dist/css/styles.css';
 
 const Chats = ({ chats, sendMessage, openChat, setOpenChat }) => {
   const [message, setMessage] = useState('')
-
+  const messagesEndRef = useRef(null)
+  useEffect(() => {
+    scrollToBottom()
+  })
+  const scrollToBottom = () => {
+    if (messagesEndRef.current)
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' })
+  }
   return (
-    
+
     <ProSidebar collapsed={!openChat} rtl={true} collapsedWidth="0px" className="chat-pro-sidebar">
       <SidebarHeader>
         <div className="chat-header">
@@ -26,32 +33,32 @@ const Chats = ({ chats, sendMessage, openChat, setOpenChat }) => {
         </div>
       </SidebarHeader>
       <SidebarContent className="chat-pro-sidebar-content">
-      {
-        chats.map((chat, index) => {
-          return(
-          <div className={`chat-wrapper ${chat.name==="You"?"chat-wrapper-user":null}`}>
-            <div className="chat-member-name">
-              {chat.name}
-            </div>
-            <div className="chat-message">
-              {chat.message}
-            </div>
-          </div>
-          )
-        })
-      }
-        </SidebarContent>
-        <SidebarFooter className="chat-pro-sidebar-footer">
+        {
+          chats.map((chat, index) => {
+            return (
+              <div className={`chat-wrapper ${chat.name === "You" ? "chat-wrapper-user" : null}`}>
+                <div className="chat-member-name">
+                  {chat.name}
+                </div>
+                <div className="chat-message">
+                  {chat.message}
+                </div>
+              </div>
+            )
+          })
+        }
+        <div ref={messagesEndRef} ></div>
+      </SidebarContent>
+      <SidebarFooter className="chat-pro-sidebar-footer">
         <input
           type="text"
           placeholder="Type here"
           className="chatEntry"
-          onKeyPress={(e)=>{
+          onKeyPress={(e) => {
             e = e || window.event;
-            if(e.key==="Enter")
-            {
-                sendMessage(message);
-                setMessage("")
+            if (e.key === "Enter") {
+              sendMessage(message);
+              setMessage("")
             }
           }}
           onChange={(e) => {
@@ -59,13 +66,13 @@ const Chats = ({ chats, sendMessage, openChat, setOpenChat }) => {
           }}
           value={message}
         />
-        <Icon 
-        icon={sendFilled} 
-        onClick={()=>{
-        sendMessage(message);
-        setMessage('')
-        }} />
-        </SidebarFooter>
+        <Icon
+          icon={sendFilled}
+          onClick={() => {
+            sendMessage(message);
+            setMessage('')
+          }} />
+      </SidebarFooter>
     </ProSidebar>
   )
 
