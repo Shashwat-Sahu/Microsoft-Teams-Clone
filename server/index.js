@@ -78,7 +78,7 @@ io.on('connection', socket => {
     socket.on("join room", ({ roomID, options, name, userId }) => {
         Room.findOneAndUpdate({ roomID: roomID }, {
             $push: {
-                roomUsers:
+                MeetingUsers:
                 {
                     id: socket.id,
                     name,
@@ -98,7 +98,7 @@ io.on('connection', socket => {
             }
             else {
                 socketToRoom[socket.id] = roomID;
-                return socket.emit("all users", data.roomUsers);
+                return socket.emit("all users", data.MeetingUsers);
             }
 
         })
@@ -117,7 +117,7 @@ io.on('connection', socket => {
         console.log(userId)
         Room.findOneAndUpdate({ roomID: roomID }, {
             $pull: {
-                roomUsers:
+                MeetingUsers:
                 {
                     userId:userId
                 }
@@ -133,8 +133,8 @@ io.on('connection', socket => {
             console.log("After left", room)
             console.log(`User ${socket.id} left from room: ${roomID}`);
 
-            if (room && room.roomUsers) {
-                room.roomUsers.forEach(user => {
+            if (room && room.MeetingUsers) {
+                room.MeetingUsers.forEach(user => {
                     if (userId !== user.userId) {
                         io.to(user.id).emit('user left', { id: socket.id, name })
                         io.to(user.id).emit('user left screen stream', socket.id + "-screen-share")
@@ -144,7 +144,7 @@ io.on('connection', socket => {
 
             }
         
-            // if (room&& (room.roomUsers.length == 0 || (room.roomUsers.length == 1 && room.roomUsers[0].id == socket.id))) {
+            // if (room&& (room.MeetingUsers.length == 0 || (room.MeetingUsers.length == 1 && room.MeetingUsers[0].id == socket.id))) {
             //     Room.findOneAndDelete({ roomID: roomID }).then(room => {
             //         console.log("deleted room", room)
             //     })
@@ -168,9 +168,9 @@ io.on('connection', socket => {
                     }
                     ).then(room => {
                         console.log(room);
-                        if (room && room.roomUsers) {
+                        if (room && room.MeetingUsers) {
 
-                            room.roomUsers.forEach(user => {
+                            room.MeetingUsers.forEach(user => {
                                 if (socket.id !== user.id)
                                     io.to(user.id).emit('screen share update',
                                         {
@@ -187,9 +187,9 @@ io.on('connection', socket => {
     });
 
     socket.on('change', (payload) => {
-        Room.findOneAndUpdate({ roomID: payload.roomID, "roomUsers.id": socket.id }, {
+        Room.findOneAndUpdate({ roomID: payload.roomID, "MeetingUsers.id": socket.id }, {
             $set: {
-                "roomUsers.$.options": {
+                "MeetingUsers.$.options": {
                     video: payload.video, audio: payload.audio
                 }
             }
@@ -251,9 +251,9 @@ io.on('connection', socket => {
         }
         ).then(room => {
             console.log(room);
-            if (room && room.roomUsers) {
+            if (room && room.MeetingUsers) {
 
-                room.roomUsers.forEach(user => {
+                room.MeetingUsers.forEach(user => {
                     if (socket.id !== user.id)
                         io.to(user.id).emit('screen share update',
                             {

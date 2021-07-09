@@ -10,7 +10,7 @@ const roomSchema = new mongoose.Schema({
         type:String,
         default:"Unknown Room"
     },
-    roomUsers:[{
+    MeetingUsers:[{
     id:{
         type:String,
         required:true
@@ -64,7 +64,7 @@ chats:[
     }
 ]
 })
-roomSchema.path('roomUsers').validate(function (value) {
+roomSchema.path('MeetingUsers').validate(function (value) {
     console.log(value.length)
     if (value.length > 10) {
       throw new Error("Atmost 10 people allowed!");

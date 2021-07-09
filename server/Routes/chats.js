@@ -46,7 +46,7 @@ router.post("/createRoom",requiredLogin,(req,res)=>{
     Room.findOneAndUpdate({ roomID: roomID }, {
         $set:{
             roomName:roomName||"Unknown Room",
-            roomUsers:[],
+            MeetingUsers:[],
             screenShareInRoom: {
                 id:null,
                 name:null
