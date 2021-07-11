@@ -4,12 +4,13 @@ const mongoose = require('mongoose')
 const User = mongoose.model("User")
 const bcrypt = require('bcryptjs')
 const jwt = require("jsonwebtoken")
+const nodemailer = require("nodemailer")
+const crypto = require('crypto'); 
 const requiredLogin = require("../middleware/requireLogin")
 
 router.post("/signup", (req, res) => {
 
     const { name, email, password, rooms } = req.body
-    console.log(req.body)
     if (!email || !password || !name) {
         return res.status(422).json({ error: "Please add all the fields" })
     }
@@ -90,5 +91,40 @@ router.post("/signin", (req, res) => {
         })
     }
 })
+
+router.post("/verifyotp",(req,res)=>{
+    if(!req.body.email)
+    return res.status(400).json({"error":"error"})
+    var transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: `teamsclonemicrosoft@gmail.com`,
+        pass: process.env.emailPassword
+      }
+    });
+    var otp = Math.floor(Math.random()*9)+""+Math.floor(Math.random()*9)+""+Math.floor(Math.random()*9)+""+Math.floor(Math.random()*9)+""+Math.floor(Math.random()*9)+""+Math.floor(Math.random()*9);
+    var mailOptions = {
+      from: {name:"Teams Microsoft",address:'teamsclonemicrosoft@gmail.com'},
+      to: req.body.email,
+      subject: 'Verify your Email ID',
+      html: `<h1>Microsoft Teams Clone</h1>
+      <p>Here's your One time password (otp) : ${otp}</p>
+      `
+    };
+    transporter.sendMail(mailOptions, function(error, info){
+      if (error) {
+        console.log(error);
+        return res.json({"error":"Error occurred"})
+      } else {
+        console.log('Email sent: ' + info.response);
+        const hash = crypto.createHash('sha256').update(otp).digest('hex'); 
+        // const token=jwt.sign({hash:hash,email:req.body.email},process.env.JWT_FORGOT_PASSWORD,{expiresIn: '10min'})
+        
+        return res.json({hash:hash})
+      }
+    });
+})
+  
+
 
 module.exports = router
