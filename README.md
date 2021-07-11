@@ -42,8 +42,14 @@ Feature|Week 4| Chat outside meeting (Database connection added)|5|Completed
 Feature|Week 4|Authorization|3|Completed
 Procedure|Week 4|Code cleaning|2|Completed
 
+# Pre Requisites
+* Gain Mongo access link from from Mongo DB and paste in .env as MONGO_URI
+* Gain App id and access token from symbl.ai and paste in .env as 'appid' and 'accessToken'
+
 # Client Side
 ## Code Prospects
+### `npm install`
+Install modules mentioned in package.json
 ### `npm start`
 
 Runs the app in the development mode.<br />
