@@ -3,7 +3,8 @@ Hey Code geek, welcome to my project 'Microsoft Teams Clone'. It was under the c
 <br/>
 Challenge was basically about connecting two people on teams via video calling. On above of that I incorporated following features:
 * Group Video Calling
-* Chat
+* Meeting Chat (inside meeting)
+* Teams Chat (outside meeting)
 * Screen Share
 * Screen Recording
 * Transcript
@@ -96,3 +97,28 @@ You will also see any errors or information in the console.
 
 ## Create Room
 ![create room](https://raw.githubusercontent.com/Shashwat-Sahu/microsoft-teams-assets/main/create%20room.png)
+
+## Join Room
+![join room](https://raw.githubusercontent.com/Shashwat-Sahu/microsoft-teams-assets/main/join%20room.png)
+
+## Home
+![home before joining](https://raw.githubusercontent.com/Shashwat-Sahu/microsoft-teams-assets/main/web%20home.png)
+
+## Meeting
+![meeting](https://raw.githubusercontent.com/Shashwat-Sahu/microsoft-teams-assets/main/web%20meet.png)
+
+## Meeting chats
+![meeting Chats](https://raw.githubusercontent.com/Shashwat-Sahu/microsoft-teams-assets/main/web%20chat.png)
+
+## Screen Share
+![screen share](https://raw.githubusercontent.com/Shashwat-Sahu/microsoft-teams-assets/main/web%20screen%20share.png)
+
+## Screen Recorder
+![meeting Chats](https://raw.githubusercontent.com/Shashwat-Sahu/microsoft-teams-assets/main/web%20screen%20recorder.png)
+
+### Screen Recorder Example
+![meeting Chats](https://github.com/Shashwat-Sahu/microsoft-teams-assets/blob/main/recording.gif?raw=true)
+
+## Transcript
+![transcript](https://raw.githubusercontent.com/Shashwat-Sahu/microsoft-teams-assets/main/web%20transcript.png)
+
