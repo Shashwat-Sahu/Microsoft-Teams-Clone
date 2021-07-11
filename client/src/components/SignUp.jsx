@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useHistory } from 'react-router-dom'
+import { Link, useHistory } from 'react-router-dom'
 import Avatar from "../assets/avatar.png";
 import Group_Connect from "../assets/home-right-vector.png";
 import { connect } from 'react-redux';
@@ -7,14 +7,58 @@ import { ToastContainer, toast } from 'react-toastify';
 import "../styles/signup.css"
 import MicrosoftTeams from "../assets/microsoft-teams.svg";
 import axios from 'axios';
-import {prodUrl as url} from "../Config/config.json"
+import Loader from "react-loader-spinner";
+import { sha256 } from "js-sha256";
+import { prodUrl as url } from "../Config/config.json"
 
 const Signup = (props) => {
     const { email, setEmail, name, setName } = props;
     const history = useHistory()
+    const [loader,setLoader] = useState(false)
     const [password, setPassword] = useState('')
     const [confirmPassword, setConfirmPassword] = useState('')
+    const [otpVerified, SetOtpVerified] = useState(false)
+    const [otpSent, setOtpSent] = useState(false)
+    const [receivedOtp,setReceivedOtp] = useState('')
+    const [clientOtp,setClientOtp] = useState('')
+    const sentOtp = () =>{
+        setLoader(true)
+        axios({
+            url:`${url}/verifyotp`,
+            data:{
+                email
+            },
+            method:'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        }).then(data=>{
+            if(data.data.hash)
+            {
+            setReceivedOtp(data.data.hash)
+            setOtpSent(true)
+            toast.info(`OTP Sent to ${email}`)
+            }
+            else
+            {
+                toast.error(data.data.error)
+            }
+            setLoader(false)
+        })
+    }
+    const verifyotp = () =>{
+        if(sha256(clientOtp)==receivedOtp)
+        {
+            toast.info("OTP Verified Successfully")
+            SetOtpVerified(true)
+        }
+        else{
+            toast.error("Wrong OTP")
+        }
+    }
     const signup = () => {
+        if(!otpVerified)
+        return
         if (!password)
             return toast.error("Password can't be empty")
         if (!email)
@@ -29,7 +73,8 @@ const Signup = (props) => {
             return toast.error("Please enter valid email !")
         if (!passwordformat.test(password))
             return toast.error("Password must contain minimum eight characters, at least one uppercase letter, one lowercase letter, one number and one special character !")
-        axios({
+        setLoader(true)
+            axios({
             url: `${url}/signup`,
             method: 'POST',
             data: {
@@ -41,6 +86,7 @@ const Signup = (props) => {
                 'Content-Type': 'application/json',
             },
         }).then(data => {
+            setLoader(false)
             toast.success("Registered Successfully", {
                 autoClose: 2000,
                 closeOnClick: false,
@@ -50,6 +96,9 @@ const Signup = (props) => {
                 history.push("/signin")
             }, 2000);
 
+        }).catch(data=>{
+            toast.error(data.response.data.error)
+            setLoader(false)
         })
     }
     return (
@@ -62,58 +111,102 @@ const Signup = (props) => {
                 <div className="signup-entry-box">
                     <img src={Avatar} className="avatar-signup" alt="Avatar" />
                     <h2 className="signup-head">Sign Up</h2>
-                    <input
+                    {!otpVerified && <h4>OTP Verification</h4>}
+                    {!otpVerified && !otpSent&&<input
                         type="email"
                         placeholder="Enter Email ID"
                         className="email-input"
                         value={email}
                         onChange={(e) => { setEmail(e.target.value) }}
 
+                    />}
+                    {
+                        otpSent&&!otpVerified&&<h6>OTP sent to {email}</h6>
+                    }
+                    {
+                        otpSent &&!otpVerified&& <input
+                        type="password"
+                        placeholder="Enter OTP"
+                        className="name-input"
+                        value={clientOtp}
+                        onChange={(e) => { setClientOtp(e.target.value) }}
+
                     />
-                    <input
+                    }
+                    {
+                        otpSent &&!otpVerified&&
+                        <h6>Please check spams, if email not found !</h6>
+                    }
+                    {otpVerified && <input
                         type="text"
                         placeholder="Enter Name"
                         className="name-input"
                         value={name}
                         onChange={(e) => { setName(e.target.value) }}
 
-                    />
-                    <input
+                    />}
+                    {otpVerified && <input
                         type="password"
                         placeholder="Enter Password"
                         className="password-input"
                         value={password}
                         onChange={(e) => { setPassword(e.target.value) }}
 
-                    />
-                    <input
+                    />}
+                    {otpVerified && <input
                         type="password"
                         placeholder="Confirm Password"
                         className="password-input"
                         value={confirmPassword}
                         onChange={(e) => { setConfirmPassword(e.target.value) }}
 
-                    />
+                    />}
                     {
                         confirmPassword !== password &&
                         <h5 style={{ color: 'red' }}>
                             *Confirm password does'nt match with password
                         </h5>
                     }
-                    <h6 className="signup-password-format">
+                    {otpVerified && <h6 className="signup-password-format">
                         Note: Password must contain minimum eight characters, at least one uppercase letter, one lowercase letter, one number and one special character
-                    </h6>
+                    </h6>}
+                    {loader&&<Loader 
+                        type="BallTriangle" 
+                        color="#00BFFF" 
+                        height={30} 
+                        width={30} />}
                     <div className="signup-entry-options">
-
-                        <button
+                        
+                        {!otpSent &&
+                            <button
+                                className="signup-entry-buttons"
+                                onClick={() => {
+                                    sentOtp()
+                                }}
+                            >
+                                Send OTP
+                            </button>
+                        }
+                        {
+                            otpSent&&!otpVerified&&<button
+                            className="signup-entry-buttons"
+                            onClick={() => {
+                                verifyotp()
+                            }}
+                        >
+                            Verify OTP
+                        </button>
+                        }
+                        {otpVerified && <button
                             className="signup-entry-buttons"
                             onClick={() => {
                                 signup()
                             }}
                         >
                             Sign Up
-                        </button>
+                        </button>}
                     </div>
+                    <h5>If already have account, <Link to={"/signin"}>Sign In</Link></h5>
                 </div>
                 <img src={Group_Connect} alt="group connect" className="signup-bottom-vector" />
 

@@ -21,7 +21,7 @@ const Routing = (props) => {
       setJoiningRoom(urlArray[urlArray.length - 1])
       const path = urlArray.find(ele => ele === 'home' || ele === 'teams')
       if (path)
-        setJoiningPath(path)
+        setJoiningPath('home')
       history.push("/")
     }
     else if (roomIdFormat.test(urlArray[urlArray.length - 2])) {

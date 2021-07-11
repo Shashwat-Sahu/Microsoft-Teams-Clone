@@ -102,3 +102,11 @@
     cursor: pointer;
 }
 
+@media screen and (max-width:660px) {
+    .signin-entry-box{
+        height: 50%;
+    }
+    .signin-bottom-vector{
+        width: 30%;
+    }
+}

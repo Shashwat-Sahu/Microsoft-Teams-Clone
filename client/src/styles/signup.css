@@ -105,3 +105,11 @@
     cursor: pointer;
 }
 
+@media screen and (max-width:660px) {
+    .signup-entry-box{
+        height: 60%;
+    }
+    .signup-bottom-vector{
+        width: 30%;
+    }
+}

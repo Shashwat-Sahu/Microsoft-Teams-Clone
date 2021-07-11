@@ -5,12 +5,14 @@ import { useHistory } from 'react-router-dom'
 import { connect } from 'react-redux';
 import { ToastContainer, toast } from 'react-toastify';
 import "../styles/signin.css"
+import Loader from "react-loader-spinner";
 import MicrosoftTeams from "../assets/microsoft-teams.svg";
 import axios from 'axios';
-import {prodUrl as url} from "../Config/config.json"
+import { prodUrl as url } from "../Config/config.json"
 
 const SignIn = (props) => {
   const { email, setEmail, setAuth } = props;
+  const [loader, setLoader] = useState(false)
   const history = useHistory()
   const [password, setPassword] = useState('')
   const signin = () => {
@@ -18,32 +20,35 @@ const SignIn = (props) => {
       return toast.error("Password can't be empty")
     if (!email)
       return toast.error("Email can't be empty")
-      axios({
-        url: `${url}/signin`,
-        method: 'POST',
-        data: {
-            email,
-            password
-        },
-        headers: {
-            'Content-Type': 'application/json',
-        },
+      setLoader(true)
+    axios({
+      url: `${url}/signin`,
+      method: 'POST',
+      data: {
+        email,
+        password
+      },
+      headers: {
+        'Content-Type': 'application/json',
+      },
     }).then(data => {
       console.log(data)
       setAuth(true)
-        toast.success("Signed in Successfully", {
-            autoClose: 2000,
-            closeOnClick: false,
-            pauseOnHover: false,
-        });
-        setAuth(true)
-        localStorage.setItem('TeamsToken',data.data.token)
-        setTimeout(() => {
-            history.push("/")
-        }, 2000);
+      setLoader(false)
+      toast.success("Signed in Successfully", {
+        autoClose: 2000,
+        closeOnClick: false,
+        pauseOnHover: false,
+      });
+      setAuth(true)
+      localStorage.setItem('TeamsToken', data.data.token)
+      setTimeout(() => {
+        history.push("/")
+      }, 2000);
 
-    }).catch(err=>{
+    }).catch(err => {
       toast.error(err.response.data.error)
+      setLoader(false)
     })
   }
   return (<>
@@ -70,6 +75,11 @@ const SignIn = (props) => {
           onChange={(e) => { setPassword(e.target.value) }}
 
         />
+        {loader && <Loader
+          type="BallTriangle"
+          color="#00BFFF"
+          height={30}
+          width={30} />}
         <div className="signin-entry-options">
           <button
             className="signin-entry-buttons"
@@ -88,10 +98,10 @@ const SignIn = (props) => {
           </button>
         </div>
       </div>
-      <img src={Group_Connect}  alt="group connect" className="signin-bottom-vector" />
+      <img src={Group_Connect} alt="group connect" className="signin-bottom-vector" />
     </div>
-    <ToastContainer/>
-</>
+    <ToastContainer />
+  </>
   )
 }
 const mapStateToProps = state => {
