@@ -2,13 +2,13 @@
 Hey Code geek, welcome to my project 'Microsoft Teams Clone'. It was under the challenge of Engage Mentorship program 2021 by Microsoft. Its been a great journey and quite insightful too.
 <br/>
 Challenge was basically about connecting two people on teams via video calling. On above of that I incorporated following features:
-* Group Video Calling
-* Meeting Chat (inside meeting)
-* Teams Chat (outside meeting)
-* Screen Share
-* Screen Recording
-* Transcript
-* Authorization
+* [Group Video Calling](#meeting)
+* [Meeting Chat (inside meeting)](#meeting-chats)
+* [Teams Chat (outside meeting)](#teams-chats)
+* [Screen Share](#screen-share)
+* [Screen Recording](#screen-recorder)
+* [Transcript](#transcript)
+* [Authorization](#sign-in)
 
 **Website Link**: [teams-clone-shashwat](https://teams-clone-shashwat.web.app/)
 
