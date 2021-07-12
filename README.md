@@ -10,7 +10,7 @@ Challenge was basically about connecting two people on teams via video calling. 
 * [Transcript](#transcript)
 * [Authorization](#sign-in)
 
-**Website Link**: [teams-clone-shashwat](https://teams-clone-shashwat.web.app/)
+**Website Link**: [teams-clone-shashwat](https://teams-clone-shashwat-sahu.web.app)
 
 # Agile Implementation
 The Development was a series of Continous Integration and continous Deployment. Each functionality was divided in weeks under SCRUM.  Each sprint’s goal was to build the most important features first and come out with a potentially deliverable product. Also even adapt feature which is taken as customer needs, was added in subsequent sprint.

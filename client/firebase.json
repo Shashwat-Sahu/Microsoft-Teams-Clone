@@ -1,5 +1,6 @@
 {
   "hosting": {
+    "site": "teams-clone-shashwat-sahu",
     "public": "build",
     "ignore": [
       "firebase.json",
@@ -14,3 +15,5 @@
     ]
   }
 }
+
+
