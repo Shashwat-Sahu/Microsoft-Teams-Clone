@@ -34,17 +34,25 @@ const MainComponent = (props) => {
         joiningPath,
         setJoiningPath
     } = props
+    // set joined rooms
     const [rooms, setRooms] = useState([])
+    // set selected room
     const [room, setRoom] = useState(undefined)
+    // store data of selected room
     const roomRef = useRef(undefined)
+    // store data of all rooms
     const roomsRef = useRef([])
+    // set chats for selected room
     const [chats, setChats] = useState([])
+    // selected room's ID
     const [roomID, setRoomId] = useState('')
+    // message for chat
     const [message, setMessage] = useState('')
     const [modalIsOpen, setmodalIsOpen] = useState(false)
     const [modalCreateRoomIsOpen, setmodalCreateRoomIsOpen] = useState(false)
     const [roomName, setRoomName] = useState('')
     const [roomSideBar, setRoomSideBar] = useState(window.screen.width > 660)
+    // ref to scroll down whenever a message arrive
     const messagesEndRef = useRef(null)
     const history = useHistory()
     const [customBackground, setCustomBackground] = useState(false)
@@ -65,7 +73,7 @@ const MainComponent = (props) => {
         },
     };
 
-
+// if socket does not exist then create one and update in database
     useEffect(() => {
         if (joiningRoom && socket != null) {
             joinRoom(joiningRoom)
@@ -203,7 +211,7 @@ const MainComponent = (props) => {
         }).catch(err => {
 
             toast.error(err.response.data.error)
-            if (joiningRoom) {
+            if (joiningRoom&&err.response.data.error!="Room doesn't exist!") {
                 setJoiningRoom(null)
                 if (joiningPath) {
                     history.push(`${joiningPath}/${RoomJoiningID}`)

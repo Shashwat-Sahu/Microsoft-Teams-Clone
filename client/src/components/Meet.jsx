@@ -21,24 +21,26 @@ import transcriptIcon from '@iconify/icons-gg/transcript';
 import Chats from "./Chats";
 import { connect } from 'react-redux';
 import "../styles/meet.css"
-import Modal from 'react-modal';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Transcript from './Transcript'
 import { prodUrl as url } from "../Config/config.json"
 import axios from "axios"
 
-
+//  Create Ref component for each peer joining
 const CreateRef = ({ peer, style, options }) => {
   // Ref for each peer
   const clientRef = useRef();
   // check whether peer video and audio setting before rendering them
   var optionUser = peer.options ? peer.options : { video: false, audio: false };
   if (options)
-  optionUser = options;
+  {
+    optionUser = options;
+  }
   useEffect(() => {
+    // Assign stream to ref on event "stream" triggered
     peer.peer.on("stream", (stream) => {
-
+      console.log(stream.getTracks())
       if (clientRef && clientRef.current)
         clientRef.current.srcObject = stream
       peer.stream = stream
@@ -46,7 +48,8 @@ const CreateRef = ({ peer, style, options }) => {
 
   }, [])
 
-
+// Return the video or off video element on the basis of stream enabled or not
+// Destroyed stream should not be re-rendered
   return peer.destroyed ? null : <>
     <div className="user-video-box" style={{ display: optionUser.video ? "block" : "none" }} id={peer.peerID + "-video_on"}>
       <UserVideo
@@ -88,11 +91,13 @@ const Meet = (props) => {
     userId,
   } = props;
 
+
+  // Ref for the user's video (not peers)
   const hostRef = useRef()
+  // List of peers
   const [peers, setPeers] = useState([]);
+  // state of user video, audio option updates
   const [userUpdate, setUserUpdate] = useState();
-  // Modal to ask Name from user (optional)
-  const [modalIsOpen, setIsOpen] = useState(name === "" ? true : false)
   const [chatBadge, setChatBadge] = useState(false)
   const socketRef = useRef();
   const peersRef = useRef([]);
@@ -107,46 +112,45 @@ const Meet = (props) => {
   const screenStreamComponent = useRef()
   // Storing screen streams for each person
   const userScreenStreams = useRef([])
+  // to open chat panel
   const [openChat, setOpenChat] = useState(false);
+  //set array of chats
   const [chats, setChats] = useState([])
+  //set array of transcripts
   const [transcripts, setTranscripts] = useState([])
+  // store transcripts
   const transcriptsRef = useRef([])
+  //open transcripts panel
   const [openTranscripts, setOpenTranscripts] = useState(false);
+  // set state of screen sharing, enabled and presenter
   const [screenSharingEnabled, setScreenSharingEnabled] = useState({ enabled: false, presenter: null })
   const screenSharingEnabledRef = useRef(false);
+  //change wallpaper of meeting
   const [customBackground, setCustomBackground] = useState(false)
+  // recordchunks which will be processed later on
   const [recordedChunks, setRecordedChunks] = useState({ enabled: false, chunks: [] })
+  //store ref to media recording
   const mediaRecorder = useRef(null)
 
 
-  const customStylesModal = {
-    overlay: {
-      backgroundColor: 'rgba(0,0,0,0.7)'
-    },
-    content: {
-      top: '50%',
-      left: '50%',
-      right: 'auto',
-      bottom: 'auto',
-      marginRight: '-50%',
-      transform: 'translate(-50%, -50%)',
-      padding: '20px'
-    },
-  };
+  //id of meeting present in url
   const roomID = props.match.params.teamId;
 
+
+  // user video styling
   const style = {
     width: "100%",
     height: "100%",
     borderRadius: "27px",
     objectFit: "cover",
   }
-
+// start streaming when join room
   useEffect(() => {
-    if (name !== "")
       startStream()
   }, [])
 
+
+ //run when ever a new person joins and share screen if enabled for new user 
   useEffect(() => {
     var i = 0;
     screenSharesRef.current.forEach((peer) => {
@@ -161,6 +165,8 @@ const Meet = (props) => {
 
   }, [screenShares, screenSharesRef])
 
+
+  // any kind of update from peers should be reflected by changing the video or audio over other peers
   useEffect(() => {
 
     if (userUpdate) {
@@ -180,6 +186,7 @@ const Meet = (props) => {
   }, [userUpdate])
 
 
+  // stop services before leaving the meeting if refreshing or closing tab by the user
   window.onbeforeunload = function () {
     stopMediaRecorder()
     socketRef.current.emit("disconnectMeet", { name, roomID, userId: userId })
@@ -192,6 +199,7 @@ const Meet = (props) => {
       }
   }
 
+  // disonnect when user leaves by explicitly clicking on leave button
   const disconnectMeet = () => {
     stopMediaRecorder()
     socketRef.current.emit("disconnectMeet", { name, roomID, userId })
@@ -204,8 +212,9 @@ const Meet = (props) => {
       1500);
   }
 
+
+  // startStream and set socket for user
   const startStream = () => {
-    setIsOpen(false)
     if (socket) {
       socketRef.current = socket
       createStream();
@@ -236,6 +245,7 @@ const Meet = (props) => {
 
   }
 
+  // socket to receive message enabled
   const startChat = () => {
     socketRef.current.on("receivedMessage", (message) => {
       setChatBadge(true)
@@ -245,7 +255,7 @@ const Meet = (props) => {
     })
   }
 
-
+// screen sharing enabling and notifying each peer that screen shareing has started, also updating stream for each peer
   const screenShare = () => {
     if (!screenSharingEnabled.enabled) {
       navigator.mediaDevices.getDisplayMedia({ video: true, audio: true }).then(screenStreamUpdate => {
@@ -275,7 +285,9 @@ const Meet = (props) => {
       }).catch(err => {
         toast.error(`Your device doesn't support screen share`, {
           position: "top-left",
-          hideProgressBar: true
+          hideProgressBar: true,
+          autoClose: 1500,
+
         });
       })
     }
@@ -301,7 +313,7 @@ const Meet = (props) => {
     }
   }
 
-
+// send message to each peer via sockets
   const sendMessage = (sendMessage) => {
     const payload = { name, message: sendMessage, senderId: socketRef.current.id, userId, roomID };
     socketRef.current.emit("send message", payload);
@@ -312,28 +324,35 @@ const Meet = (props) => {
   }
 
 
-
-  var accessToken=null;
+// variables for transcript in each room
+  var accessToken = null;
   var uniqueMeetingId;
   var symblEndpoint;
   var ws;
 
-  const startLoadingTranscript=(transcriptStream)=>{
-  {
+// loading of transcript and get access token from server
+  const startLoadingTranscript = (transcriptStream) => {
+    {
       axios(
         {
           url: `${url}/transcriptToken`,
           method: 'GET'
         }).then(data => {
+          toast.dark("Transcript is loading",{
+            hideProgressBar:true,
+            autoClose:1500,
+            position:'top-left'
+          })
           accessToken = data.data.accessToken
           uniqueMeetingId = btoa(roomID)
           symblEndpoint = `wss://api.symbl.ai/v1/realtime/insights/${uniqueMeetingId}?access_token=${accessToken}`;
           ws = new WebSocket(symblEndpoint);
-          startTranscripting({ stream:transcriptStream, roomID, socketRef, name })
+          startTranscripting({ stream: transcriptStream, roomID, socketRef, name })
         })
     }
   }
 
+//start transcripting
   const startTranscripting = ({ stream, roomID, socketRef, name }) => {
     // Fired when a message is received from the WebSocket server
     ws.onmessage = (event) => {
@@ -347,9 +366,9 @@ const Meet = (props) => {
         for (let message of data.messages) {
           // console.log('Transcript (more accurate): ', message.payload.content);
           messagesConcatenation = messagesConcatenation + message.payload.content;
-        
-        transcriptsRef.current = [...transcriptsRef.current, { name: message.from.userId==userId?'You':message.from.name, message: message.payload.content }]
-        setTranscripts(transcriptsRef.current)
+
+          transcriptsRef.current = [...transcriptsRef.current, { name: message.from.userId == userId ? 'You' : message.from.name, message: message.payload.content }]
+          setTranscripts(transcriptsRef.current)
         }
       }
       if (data.type === 'topic_response') {
@@ -380,9 +399,10 @@ const Meet = (props) => {
 
     // Fired when the connection succeeds.
     ws.onopen = (event) => {
-      toast.dark("Transcript is ON",{
-        hideProgressBar:true,
-        position:'top-left'
+      toast.dark("Transcript is ON", {
+        hideProgressBar: true,
+        position: 'top-left',
+        autoClose: 1500
       })
       ws.send(JSON.stringify({
         type: 'start_request',
@@ -436,17 +456,19 @@ const Meet = (props) => {
   }
 
   const stopTranscripting = () => {
-    
-    if(ws)
-    {
-    ws.close()
-    toast.dark("Transcript stopped !",{
-      hideProgressBar:true,
-      position:'top-left'
-    })
+
+    if (ws) {
+      ws.close()
+      toast.dark("Transcript stopped !", {
+        hideProgressBar: true,
+        position: 'top-left',
+        autoClose: 1500
+      })
     }
   }
 
+
+  //create stream os user and add already present users
   function createStream() {
     MediaInit({ camera, mic, hostRef, setStream }).then((stream) => {
       setStream(stream);
@@ -472,13 +494,14 @@ const Meet = (props) => {
         }
         )
       }
-      // if(mic)
       startLoadingTranscript(hostRef.current.srcObject)
 
       var options = { audio: mic, video: camera }
+      // join room
       socketRef.current.emit("join room", { roomID, options, name, userId: userId });
+      // receive already present users
       socketRef.current.on("all users", (users) => {
-
+      // add peers 
         const peers = [];
         users.forEach((userID) => {
           const peer = createPeer(userID.id, socketRef.current.id, stream, options, name);
@@ -499,6 +522,7 @@ const Meet = (props) => {
           toast.dark(`${userID.name} is already present`, {
             position: "top-left",
             hideProgressBar: true,
+            autoClose: 1500
           });
         });
         setPeers(peers);
@@ -523,6 +547,7 @@ const Meet = (props) => {
         setScreenShares(peersForScreenStream);
 
       });
+      // add peer when a user joins
       socketRef.current.on("user joined", (payload) => {
         const peer = addPeer(payload.signal, payload.callerID, stream, payload.options, payload.name);
         peersRef.current.push({
@@ -545,10 +570,11 @@ const Meet = (props) => {
         setPeers(peerUpdate)
         toast.dark(`${payload.name} has joined`, {
           position: "top-left",
-          hideProgressBar: true
+          hideProgressBar: true,
+          autoClose: 1500
         });
       });
-
+      // destroy peer when user leaves
       socketRef.current.on("user left", ({ id, name }) => {
         peersRef.current.filter((p) => {
           if (p.peerID === id) {
@@ -557,14 +583,16 @@ const Meet = (props) => {
             if (name === undefined)
               toast.dark(`${p.name} has left`, {
                 position: "top-left",
-                hideProgressBar: true
+                hideProgressBar: true,
+                autoClose: 1500
               });
           }
         });
         if (name !== undefined)
           toast.dark(`${name} has left`, {
             position: "top-left",
-            hideProgressBar: true
+            hideProgressBar: true,
+            autoClose: 1500
           });
       });
 
@@ -572,11 +600,12 @@ const Meet = (props) => {
         const item = peersRef.current.find((p) => p.peerID === payload.id);
         item.peer.signal(payload.signal);
       });
-
+      // any kind of update by peer should be reflected for others
       socketRef.current.on("change", (payload) => {
         setUserUpdate({ id: payload.id, video: payload.video, audio: payload.audio });
       });
 
+      // add screen streams of users
       socketRef.current.on("user added screen stream", (payload) => {
 
         const peer = addPeerForScreenShare(payload.signal, payload.callerID, screenStream.current);
@@ -594,6 +623,7 @@ const Meet = (props) => {
           enableScreenSharingForNewUser(peer)
       });
 
+      // destroy screen stream if a user left
       socketRef.current.on("user left screen stream", (id) => {
 
         const index = screenSharesRef.current.findIndex((p) => p.peerID === id);
@@ -622,7 +652,8 @@ const Meet = (props) => {
           screenStreamComponent.current.srcObject = peer.stream;
           toast.dark(`${payload.name} started screen sharing`, {
             position: "top-left",
-            hideProgressBar: true
+            hideProgressBar: true,
+            autoClose: 1500
           })
         }
         else {
@@ -630,7 +661,8 @@ const Meet = (props) => {
           screenSharingEnabledRef.current = false
           toast.dark(`${payload.name} stopped screen sharing`, {
             position: "top-left",
-            hideProgressBar: false
+            hideProgressBar: false,
+            autoClose: 1500
           })
         }
       })
@@ -639,14 +671,15 @@ const Meet = (props) => {
     }).catch(err => {
       toast.error('Devices not working properly', {
         position: 'top-left',
-        hideProgressBar: true
+        hideProgressBar: true,
+        autoClose: 1500
       })
       console.error(err)
     })
   }
 
 
-
+// create peer for present users
   function createPeer(userToSignal, callerID, stream, options, name) {
     const peer = new Peer({
       initiator: true,
@@ -669,6 +702,7 @@ const Meet = (props) => {
     return peer;
   }
 
+  // add  peer for new users joining
   function addPeer(incomingSignal, callerID, stream, options) {
     const peer = new Peer({
       initiator: false,
@@ -685,6 +719,7 @@ const Meet = (props) => {
     return peer;
   }
 
+  // create peer for present users  for screen sharing
   function createPeerForScreenShare(userToSignal, callerID, stream) {
     const peer = new Peer({
       initiator: true,
@@ -705,7 +740,7 @@ const Meet = (props) => {
 
     return peer;
   }
-
+  // add  peer for new users joining for screen sharing
   function addPeerForScreenShare(incomingSignal, callerID, stream) {
     const peer = new Peer({
       initiator: false,
@@ -722,7 +757,7 @@ const Meet = (props) => {
     return peer;
   }
 
-
+// toggle state when video or audio are updated
   const ToggleState = (kind, state, setState) => {
     if (hostRef.current.srcObject && hostRef.current && hostRef) {
       hostRef.current.srcObject.getTracks().forEach(function (track) {
@@ -743,9 +778,11 @@ const Meet = (props) => {
 
   }
 
+  // Media Recording start
   const startMediaRecorder = () => {
 
     var videos = document.getElementsByTagName('video')
+    // connecting screenshare audio with users audio
     const audioContext = new AudioContext();
     var audios = [];
     var dest = audioContext.createMediaStreamDestination();
@@ -760,12 +797,15 @@ const Meet = (props) => {
       }
     }
 
-    var newScreenRecorderStream = new MediaStream([dest.stream.getAudioTracks()[0], screenStreamComponent.current.srcObject.getVideoTracks()[0]])
+    var newScreenRecorderStream = new MediaStream([
+      dest.stream.getAudioTracks()[0], 
+    screenStreamComponent.current.srcObject.getVideoTracks()[0]])
 
     setRecordedChunks({ enabled: true, chunks: [...recordedChunks.chunks] })
     toast.info("Screen Recording Started", {
       position: 'top-left',
-      hideProgressBar:true
+      hideProgressBar: true,
+      autoClose: 1500
     })
 
     // add opus in mimeType so that firefox also supports
@@ -800,7 +840,8 @@ const Meet = (props) => {
     setRecordedChunks({ enabled: false, chunks: [] })
     toast.info("Screen Recording Stopped", {
       position: 'top-left',
-      hideProgressBar:true
+      hideProgressBar: true,
+      autoClose: 1500
     })
     mediaRecorder.current = null
   }
@@ -813,72 +854,7 @@ const Meet = (props) => {
 
   return (
     <div className="meet-parent">
-      {/* Modal to add name */}
-      <Modal
-        isOpen={modalIsOpen}
-        onRequestClose={startStream}
-        style={customStylesModal}
-        contentLabel="Name Modal"
-      >
-        <input
-          type="text"
-          placeholder="Enter Name (Optional)"
-          className="name-input-meet"
-          onChange={(e) => { setName(e.target.value) }}
-        />
-        <div className="Modal-Box-Meet-options">
-          {
-            mic
-              ?
-              <Icon
-                icon={micIcon}
-                className="meet-modal-controllers"
-                onClick={() => {
 
-                  setMic(!mic)
-
-                }} />
-              :
-              <Icon
-                icon={micMute}
-                className="meet-modal-controllers"
-                onClick={() => {
-
-                  setMic(!mic)
-
-                }} />
-          }
-          {
-            camera
-              ?
-              <Icon
-                icon={cameraVideo}
-                className="meet-modal-controllers"
-                onClick={() => {
-                  setCamera(!camera)
-
-                }} />
-              :
-              <Icon
-                icon={cameraVideoOff}
-                className="meet-modal-controllers"
-                onClick={() => {
-                  setCamera(!camera)
-
-                }} />
-          }
-        </div>
-        <div className="Modal-Box-Meet-footer">
-          <button
-            className="home-entry-buttons"
-            onClick={startStream}
-          >Confirm</button>
-          <button
-            className="home-entry-buttons"
-            onClick={() => { setName("Anonymous"); startStream(); }}
-          >Close</button>
-        </div>
-      </Modal>
       {/* Transcript component */}
       <Transcript
         transcripts={transcripts}
@@ -918,7 +894,8 @@ const Meet = (props) => {
                   if (screenSharingEnabled.enabled && screenSharingEnabled.presenter !== socketRef.current.id)
                     return toast.dark("Only presenter can record screen", {
                       position: 'top-left',
-                      hideProgressBar:true
+                      hideProgressBar: true,
+                      autoClose: 1500
                     })
                   if (screenSharingEnabled.enabled && recordedChunks.enabled) {
                     stopMediaRecorder()
@@ -929,7 +906,8 @@ const Meet = (props) => {
                   else {
                     toast.dark("Start Screen Sharing before Recording", {
                       position: 'top-left',
-                      hideProgressBar:true
+                      hideProgressBar: true,
+                      autoClose: 1500
                     })
                   }
                 }}>
@@ -1094,7 +1072,9 @@ const Meet = (props) => {
         </div>
       </div>
       <Chats chats={chats} sendMessage={sendMessage} openChat={openChat} setOpenChat={setOpenChat} />
-      <ToastContainer />
+      <ToastContainer 
+      pauseOnFocusLoss={false}
+      />
       <ReactTooltip effect="solid" place="bottom" />
     </div>
   )
