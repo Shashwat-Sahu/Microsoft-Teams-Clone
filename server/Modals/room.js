@@ -53,6 +53,10 @@ screenShareInRoom: {
         type: String
     }
 },
+transcriptEnabled:{
+    userId:String,
+    name:String
+},
 chats:[
     {
         userId:{

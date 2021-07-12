@@ -13,7 +13,7 @@ Challenge was basically about connecting two people on teams via video calling. 
 **Website Link**: [teams-clone-shashwat](https://teams-clone-shashwat-sahu.web.app)
 
 # Agile Implementation
-The Development was a series of Continous Integration and continous Deployment. Each functionality was divided in weeks under SCRUM.  Each sprint’s goal was to build the most important features first and come out with a potentially deliverable product. Also even adapt feature which is taken as customer needs, was added in subsequent sprint.
+The Development was a series of continuous Integration and continuous Deployment. Each functionality was divided in weeks under SCRUM.  Each sprint’s goal was to build the most important features first and come out with a potentially deliverable product. Also even adapt feature which is taken as customer needs, was added in subsequent sprint.
 <br/>
 Priorty Level:
 * 1: Lowest Priority
@@ -27,7 +27,7 @@ Priorty Level:
 |----|----|-----|-----|-----|
 Setup|Week 1|Front End : React<br/>Backend: Nodejs<br/>DBMS: MongoDB| 4|Completed
 Feature|Week 1|Video Calling between two people| 5|Completed
-|Bug 01| Week 1| Peer Connections distrupted| 5|Resolved
+|Bug 01| Week 1| Peer Connections disrupted| 5|Resolved
 Feature|Week 1|Video Calling between group of people| 4|Pending
 |Bug 02| Week 1| Peers not destroying in group video calling| 5|Pending
 Feature|Week 2|Meeting Chat| 3|Completed

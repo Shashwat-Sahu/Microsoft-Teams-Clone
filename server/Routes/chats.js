@@ -26,7 +26,6 @@ request(authOptions, (err, response, body) => {
     throw err
   }
   res.send(body)
-  console.log(JSON.stringify(body, null, 2));
 });
 })
 

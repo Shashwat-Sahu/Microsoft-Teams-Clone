@@ -16,6 +16,7 @@ import menuIcon from '@iconify/icons-carbon/menu';
 import desktopArrowRight24Regular from '@iconify/icons-fluent/desktop-arrow-right-24-regular';
 import bxLogOut from '@iconify/icons-bx/bx-log-out';
 import ReactTooltip from 'react-tooltip';
+import Loader from "react-loader-spinner";
 import joinOuter from '@iconify/icons-carbon/join-outer';
 import { prodUrl as url } from "../Config/config.json"
 import bxsAddToQueue from '@iconify/icons-bx/bxs-add-to-queue';
@@ -56,6 +57,7 @@ const MainComponent = (props) => {
     const messagesEndRef = useRef(null)
     const history = useHistory()
     const [customBackground, setCustomBackground] = useState(false)
+    const [loader, setLoader] = useState(false)
 
     const customStylesModal = {
         overlay: {
@@ -73,7 +75,7 @@ const MainComponent = (props) => {
         },
     };
 
-// if socket does not exist then create one and update in database
+    // if socket does not exist then create one and update in database
     useEffect(() => {
         if (joiningRoom && socket != null) {
             joinRoom(joiningRoom)
@@ -149,6 +151,7 @@ const MainComponent = (props) => {
         }
     }, [socket])
     const createRoom = () => {
+        setLoader(true)
         axios({
             url: `${url}/createRoom`,
             method: 'POST',
@@ -162,6 +165,7 @@ const MainComponent = (props) => {
                 roomName: roomName || undefined
             }
         }).then(data => {
+            setLoader(false)
             const roomsUpdate = [...roomsRef.current, data.data]
             roomsRef.current = roomsUpdate
             setRooms(roomsRef.current)
@@ -179,7 +183,7 @@ const MainComponent = (props) => {
         var roomIdFormat = /[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}/;
         if (!roomIdFormat.test(RoomJoiningID))
             return toast.error("Incorrect roomID");
-
+        setLoader(true)
         axios({
             url: `${url}/joinRoom`,
             method: 'POST',
@@ -192,6 +196,7 @@ const MainComponent = (props) => {
                 socketId: socket.id
             }
         }).then(data => {
+            setLoader(false)
             const roomsUpdate = [...roomsRef.current, data.data]
             roomsRef.current = roomsUpdate
             setRooms(roomsRef.current)
@@ -206,19 +211,17 @@ const MainComponent = (props) => {
                     setJoiningPath(null)
                 }
             }
-            return "joined"
 
         }).catch(err => {
-
+            setLoader(false)
             toast.error(err.response.data.error)
-            if (joiningRoom&&err.response.data.error!="Room doesn't exist!") {
+            if (joiningRoom && err.response.data.error != "Room doesn't exist!") {
                 setJoiningRoom(null)
                 if (joiningPath) {
                     history.push(`${joiningPath}/${RoomJoiningID}`)
                     setJoiningPath(null)
                 }
             }
-            return "not joined"
         })
     }
 
@@ -284,6 +287,11 @@ const MainComponent = (props) => {
                         }}
                     />
                 </div>
+                {loader && <Loader
+                    type="BallTriangle"
+                    color="#00BFFF"
+                    height={30}
+                    width={30} />}
                 <button className="join-room-main-chat"
                     onClick={() => {
                         joinRoom(roomID)
@@ -312,6 +320,11 @@ const MainComponent = (props) => {
                         }}
                     />
                 </div>
+                {loader && <Loader
+                    type="BallTriangle"
+                    color="#00BFFF"
+                    height={30}
+                    width={30} />}
                 <button className="join-room-main-chat"
                     onClick={() => {
                         createRoom()

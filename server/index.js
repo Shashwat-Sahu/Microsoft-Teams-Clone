@@ -92,7 +92,11 @@ io.on('connection', socket => {
                 returnOriginal: false
             }
         ).then(data => {
-
+            console.log(data)
+            if(data.transcriptEnabled.userId!=null)
+            {
+                io.to(socket.id).emit("transcript updated",{enabled:true,name:data.transcriptEnabled.name})
+            }
             if (data == null) {
                 return socket.emit("all users", []);
             }
@@ -100,7 +104,7 @@ io.on('connection', socket => {
                 socketToRoom[socket.id] = roomID;
                 return socket.emit("all users", data.MeetingUsers);
             }
-
+            
         })
     });
 
@@ -153,12 +157,17 @@ io.on('connection', socket => {
             Room.findOne({ roomID: roomID }).then(data => {
                 console.log(data)
                 console.log(socket.id)
-                if (data && data.screenShareInRoom.id == socket.id) {
+                if (data ) {
                     Room.findOneAndUpdate({ roomID: roomID }, {
                         $set: {
                             screenShareInRoom: {
-                                id: null,
-                                name: null
+                                id: data.screenShareInRoom.id == socket.id?null:data.screenShareInRoom.id,
+                                name: data.screenShareInRoom.id == socket.id?null:data.screenShareInRoom.name
+                            }
+                            ,
+                            transcriptEnabled:{
+                                userId:data.MeetingUsers.length==0?null:data.transcriptEnabled.userId,
+                                name:data.MeetingUsers.length==0?null:data.transcriptEnabled.name,
                             }
                         }
                     }, {
@@ -167,8 +176,7 @@ io.on('connection', socket => {
                         upsert: true
                     }
                     ).then(room => {
-                        console.log(room);
-                        if (room && room.MeetingUsers) {
+                        if (room && room.MeetingUsers&&data.screenShareInRoom.id == socket.id) {
 
                             room.MeetingUsers.forEach(user => {
                                 if (socket.id !== user.id)
@@ -266,6 +274,31 @@ io.on('connection', socket => {
         })
     })
 
+    socket.on("transcript enabled",payload=>{
+        console.log(payload)
+        Room.findOneAndUpdate({ roomID: payload.roomID }, {
+         $set:{
+            transcriptEnabled:{
+                userId:payload.enabled?payload.userId:null,
+                name:payload.enabled?payload.name:null
+            }
+         }
+        },{
+            new:true,
+        }).then(room=>{
+            if (room && room.MeetingUsers) {
+
+                room.MeetingUsers.forEach(user => {
+                    if (socket.id !== user.id)
+                        io.to(user.id).emit('transcript updated',
+                            {
+                                enabled:payload.enabled,
+                                name: payload.name
+                            });
+                })
+            }
+        })
+    })
 
     socket.on("screen streaming running for new user", (payload) => {
 

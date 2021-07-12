@@ -121,6 +121,7 @@ const Meet = (props) => {
   // store transcripts
   const transcriptsRef = useRef([])
   //open transcripts panel
+  const [transcriptEnabled,setTranscriptEnabled] = useState(false)
   const [openTranscripts, setOpenTranscripts] = useState(false);
   // set state of screen sharing, enabled and presenter
   const [screenSharingEnabled, setScreenSharingEnabled] = useState({ enabled: false, presenter: null })
@@ -328,11 +329,13 @@ const Meet = (props) => {
   var accessToken = null;
   var uniqueMeetingId;
   var symblEndpoint;
-  var ws;
+  const ws = useRef()
 
 // loading of transcript and get access token from server
   const startLoadingTranscript = (transcriptStream) => {
     {
+
+      setTranscriptEnabled(true)
       axios(
         {
           url: `${url}/transcriptToken`,
@@ -346,8 +349,10 @@ const Meet = (props) => {
           accessToken = data.data.accessToken
           uniqueMeetingId = btoa(roomID)
           symblEndpoint = `wss://api.symbl.ai/v1/realtime/insights/${uniqueMeetingId}?access_token=${accessToken}`;
-          ws = new WebSocket(symblEndpoint);
-          startTranscripting({ stream: transcriptStream, roomID, socketRef, name })
+          ws.current=new WebSocket(symblEndpoint)
+            startTranscripting({ stream: transcriptStream, roomID, socketRef, name })
+          
+
         })
     }
   }
@@ -355,7 +360,7 @@ const Meet = (props) => {
 //start transcripting
   const startTranscripting = ({ stream, roomID, socketRef, name }) => {
     // Fired when a message is received from the WebSocket server
-    ws.onmessage = (event) => {
+    ws.current.onmessage = (event) => {
       // You can find the conversationId in event.message.data.conversationId;
       const data = JSON.parse(event.data);
       if (data.type === 'message' && data.message.hasOwnProperty('data')) {
@@ -388,23 +393,23 @@ const Meet = (props) => {
     };
 
     // Fired when the WebSocket closes unexpectedly due to an error or lost connetion
-    ws.onerror = (err) => {
+    ws.current.onerror = (err) => {
       console.error(err);
     };
 
     // Fired when the WebSocket connection has been closed
-    ws.onclose = (event) => {
+    ws.current.onclose = (event) => {
       console.info('Connection to websocket closed');
     };
 
     // Fired when the connection succeeds.
-    ws.onopen = (event) => {
+    ws.current.onopen = (event) => {
       toast.dark("Transcript is ON", {
         hideProgressBar: true,
         position: 'top-left',
         autoClose: 1500
       })
-      ws.send(JSON.stringify({
+      ws.current.send(JSON.stringify({
         type: 'start_request',
         meetingTitle: 'Websockets How-to', // Conversation name
         insightTypes: ['question', 'action_item'], // Will enable insight generation
@@ -445,8 +450,8 @@ const Meet = (props) => {
           targetBuffer[index] = 32767 * Math.min(1, inputData[index]);
         }
         // Send audio stream to websocket.
-        if (ws.readyState === WebSocket.OPEN) {
-          ws.send(targetBuffer.buffer);
+        if (ws.current.readyState === WebSocket.OPEN) {
+          ws.current.send(targetBuffer.buffer);
         }
       };
     };
@@ -456,9 +461,12 @@ const Meet = (props) => {
   }
 
   const stopTranscripting = () => {
-
-    if (ws) {
-      ws.close()
+    if(ws.current)
+    {
+    ws.current.send(JSON.stringify({
+      "type": "stop_request"
+    }));
+    setTranscriptEnabled(false)
       toast.dark("Transcript stopped !", {
         hideProgressBar: true,
         position: 'top-left',
@@ -494,11 +502,28 @@ const Meet = (props) => {
         }
         )
       }
-      startLoadingTranscript(hostRef.current.srcObject)
 
       var options = { audio: mic, video: camera }
       // join room
       socketRef.current.emit("join room", { roomID, options, name, userId: userId });
+      // if transcript is enabled or disabled
+      socketRef.current.on("transcript updated",payload=>{
+        if(payload.enabled)
+        {
+          toast.dark(`Transcript enabled by ${payload.name}`,{
+          position:'top-left',
+          hideProgressBar:true
+          })
+          startLoadingTranscript(hostRef.current.srcObject)
+        }
+        else{
+          toast.dark(`Transcript disabled by ${payload.name}`,{
+            position:'top-left',
+            hideProgressBar:true
+            })
+          stopTranscripting()
+        }
+      })
       // receive already present users
       socketRef.current.on("all users", (users) => {
       // add peers 
@@ -667,6 +692,7 @@ const Meet = (props) => {
         }
       })
 
+      
 
     }).catch(err => {
       toast.error('Devices not working properly', {
@@ -918,6 +944,27 @@ const Meet = (props) => {
 
                     }}
                   /></li>
+                  <li
+                  >
+                    <span>{transcriptEnabled?'Disable':'Enable'}<br/> Transcript</span>
+                    <Switch
+                    className="background-switcher"
+                    uncheckedIcon={false}
+                    checkedIcon={false}
+                    onChange={()=>{
+                      if(!transcriptEnabled)
+                      {
+                        
+                      socketRef.current.emit("transcript enabled",{userId,name,roomID,enabled:true})
+                      startLoadingTranscript(hostRef.current.srcObject)
+                      }
+                      else
+                      {
+                        socketRef.current.emit("transcript enabled",{userId,name,roomID,enabled:false})
+                        stopTranscripting()                      
+                      }
+                    }} checked={transcriptEnabled} />
+                  </li>
               </ul>
             </div>
             <Icon
