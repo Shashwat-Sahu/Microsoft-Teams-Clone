@@ -12,15 +12,24 @@ import { sha256 } from "js-sha256";
 import { prodUrl as url } from "../Config/config.json"
 
 const Signup = (props) => {
+    // set context user data
     const { email, setEmail, name, setName } = props;
+    // for redirect
     const history = useHistory()
     const [loader,setLoader] = useState(false)
+    // pasword entered
     const [password, setPassword] = useState('')
+    // confirm pasword entered
     const [confirmPassword, setConfirmPassword] = useState('')
+    // otp verified or not
     const [otpVerified, SetOtpVerified] = useState(false)
+    // otp sent to mail or not
     const [otpSent, setOtpSent] = useState(false)
+    // received sha256 hashed otp
     const [receivedOtp,setReceivedOtp] = useState('')
     const [clientOtp,setClientOtp] = useState('')
+
+    // otp hashed receive and email id sent
     const sentOtp = () =>{
         setLoader(true)
         axios({
@@ -46,6 +55,8 @@ const Signup = (props) => {
             setLoader(false)
         })
     }
+
+    // verification of otp 
     const verifyotp = () =>{
         if(sha256(clientOtp)==receivedOtp)
         {
@@ -59,8 +70,10 @@ const Signup = (props) => {
     const signup = () => {
         if(!otpVerified)
         return
+        // Password should not be empty    
         if (!password)
             return toast.error("Password can't be empty")
+        // email should not be empty
         if (!email)
             return toast.error("Email can't be empty")
         if (!name)
@@ -69,11 +82,14 @@ const Signup = (props) => {
             return toast.error("Confirm password does'nt match with password")
         var mailformat = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
         var passwordformat = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        // Validate email id
         if (!mailformat.test(email))
             return toast.error("Please enter valid email !")
+        // Validate password 
         if (!passwordformat.test(password))
             return toast.error("Password must contain minimum eight characters, at least one uppercase letter, one lowercase letter, one number and one special character !")
         setLoader(true)
+        //signup via server
             axios({
             url: `${url}/signup`,
             method: 'POST',

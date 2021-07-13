@@ -104,7 +104,7 @@ const MainComponent = (props) => {
 
         }
 
-
+        // get chats for all room joined
         axios({
             url: `${url}/getChats`,
             method: 'GET',
@@ -124,10 +124,12 @@ const MainComponent = (props) => {
 
     useEffect(() => {
         if (socket) {
+            // redirect if url says so
             if (joiningRoom) {
                 joinRoom(joiningRoom)
 
             }
+            // on receiving message
             socket.on("receivedMessage", (payload) => {
 
                 const { name, message, userId, roomID } = payload
@@ -150,6 +152,8 @@ const MainComponent = (props) => {
             })
         }
     }, [socket])
+
+    //create room
     const createRoom = () => {
         setLoader(true)
         axios({
@@ -176,6 +180,7 @@ const MainComponent = (props) => {
         })
     }
 
+    // join room , also if redirecting then do it
     const joinRoom = (RoomJoiningID) => {
 
         if (!RoomJoiningID)
@@ -207,6 +212,7 @@ const MainComponent = (props) => {
             if (joiningRoom) {
                 setJoiningRoom(null)
                 if (joiningPath) {
+                    // redirect
                     history.push(`${joiningPath}/${RoomJoiningID}`)
                     setJoiningPath(null)
                 }
@@ -215,6 +221,7 @@ const MainComponent = (props) => {
         }).catch(err => {
             setLoader(false)
             toast.error(err.response.data.error)
+            // redirect if room exists
             if (joiningRoom && err.response.data.error != "Room doesn't exist!") {
                 setJoiningRoom(null)
                 if (joiningPath) {
@@ -226,7 +233,7 @@ const MainComponent = (props) => {
     }
 
     const selectRoom = (e) => {
-
+        // select room
         var roomID = e.target.dataset.roomid;
         var room = rooms.filter(room => room.roomID == roomID)
         setChats(room[0].chats)
@@ -238,6 +245,7 @@ const MainComponent = (props) => {
             setRoomSideBar(false)
     }
     const sendMessage = (sendMessage) => {
+        // send message to others
         const payload = { name, message: sendMessage, userId: userId, roomID: room.roomID };
         socket.emit("send message", payload);
         const roomUpdate = roomRef.current;
@@ -255,6 +263,7 @@ const MainComponent = (props) => {
         setRooms(roomsRef.current)
         scrollToBottom()
     }
+    //Automatic scroll to bottom
     useEffect(() => {
         scrollToBottom()
     })
@@ -265,7 +274,7 @@ const MainComponent = (props) => {
 
     return (
         <div className="main-component-parent">
-
+            {/* Modal to join room  */}
             <Modal
                 isOpen={modalIsOpen}
                 onRequestClose={() => {
@@ -299,6 +308,7 @@ const MainComponent = (props) => {
                     Join room
                 </button>
             </Modal>
+            {/* Modal to create room */}
             <Modal
                 isOpen={modalCreateRoomIsOpen}
                 onRequestClose={() => {

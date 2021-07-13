@@ -13,7 +13,7 @@ Challenge was basically about connecting two people on teams via video calling. 
 **Website Link**: [teams-clone-shashwat](https://teams-clone-shashwat-sahu.web.app)
 
 # Agile Implementation
-The Development was a series of continuous Integration and continuous Deployment. Each functionality was divided in weeks under SCRUM.  Each sprint’s goal was to build the most important features first and come out with a potentially deliverable product. Also even adapt feature which is taken as customer needs, was added in subsequent sprint.
+The Development was a series of continuous Integration and continuous Deployment. Each functionality was divided in weeks under SCRUM.  Each sprint’s goal was to build the most important features first and come out with a potentially deliverable product. Testing was done on Selenium IDE. Also even adapt feature which is taken as customer needs, was added in subsequent sprint.
 <br/>
 Priorty Level:
 * 1: Lowest Priority
@@ -40,6 +40,7 @@ Feature| Week 3| Screen Recording|3 |Completed
 Feature| Week 3| Transcript Added (Socket implementation remaining)| 2|Pending
 Feature|Week 4| Chat outside meeting (Adapt feature)|5|Completed
 Feature|Week 4|Authorization|3|Completed
+Procedure|Week 4|Testing Phase (on selenium)|3|Completed
 Procedure|Week 4|Code cleaning|2|Completed
 
 # Pre Requisites

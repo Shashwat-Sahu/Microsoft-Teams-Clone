@@ -11,16 +11,23 @@ import axios from 'axios';
 import { prodUrl as url } from "../Config/config.json"
 
 const SignIn = (props) => {
+  // set context user data
   const { email, setEmail, setAuth } = props;
   const [loader, setLoader] = useState(false)
+  // for redirecting
   const history = useHistory()
+  // pasword entered
   const [password, setPassword] = useState('')
   const signin = () => {
+    // Password should not be empty
     if (!password)
       return toast.error("Password can't be empty")
+    // Email should not be empty
     if (!email)
       return toast.error("Email can't be empty")
-      setLoader(true)
+    setLoader(true)
+
+    // fetch server sign for authorization
     axios({
       url: `${url}/signin`,
       method: 'POST',
@@ -41,12 +48,14 @@ const SignIn = (props) => {
         pauseOnHover: false,
       });
       setAuth(true)
+      // set token at local Storage for future services check
       localStorage.setItem('TeamsToken', data.data.token)
       setTimeout(() => {
         history.push("/")
       }, 2000);
 
     }).catch(err => {
+      // if not verified
       toast.error(err.response.data.error)
       setLoader(false)
     })

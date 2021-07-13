@@ -1,5 +1,5 @@
 import { combineReducers } from 'redux'
-
+// store user details
 var initState = {
     userId: null,
     name: '',
