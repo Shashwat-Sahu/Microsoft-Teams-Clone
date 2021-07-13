@@ -12,6 +12,8 @@ Challenge was basically about connecting two people on teams via video calling. 
 
 **Website Link**: [teams-clone-shashwat](https://teams-clone-shashwat-sahu.web.app)
 
+**Youtube Link:**: [teams-clone-shashwat-youtube](https://youtu.be/_Lk43g-i_eY)
+
 ***Thanks to [symbl.ai](https://platform.symbl.ai/#/home) for transcript API*** 
 
 # Agile Implementation
