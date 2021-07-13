@@ -83,6 +83,8 @@ You don’t have to ever use `eject`. The curated feature set is suitable for sm
 
 
 # Server Side
+### `npm install`
+Install modules mentioned in package.json
 ### `npm start`
 
 Runs the app in the development mode.<br />
