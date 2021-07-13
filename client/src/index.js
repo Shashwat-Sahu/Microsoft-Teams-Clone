@@ -9,7 +9,7 @@ import {createStore} from 'redux';
 
 const store = createStore(Reducer, window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__());
 const token = localStorage.getItem('TeamsToken')
-
+// Extract token to check for authorization
 if (token) {
   store.dispatch({type: 'SET_AUTH', auth: true})
 }

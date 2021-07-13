@@ -16,6 +16,7 @@ const Routing = (props) => {
 
   useEffect(() => {
     const urlArray = window.location.href.split("/")
+    // Redirect to meeting and join room if url was shared 
     var roomIdFormat = /[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}/;
     if (roomIdFormat.test(urlArray[urlArray.length - 1])) {
       setJoiningRoom(urlArray[urlArray.length - 1])
@@ -31,6 +32,7 @@ const Routing = (props) => {
         setJoiningPath(path)
       history.push("/")
     }
+    // if not authorized then redirect to sign in
     if (!auth)
       history.push("/signin")
   }, [])
