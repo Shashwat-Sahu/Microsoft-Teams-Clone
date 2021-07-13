@@ -12,6 +12,8 @@ Challenge was basically about connecting two people on teams via video calling. 
 
 **Website Link**: [teams-clone-shashwat](https://teams-clone-shashwat-sahu.web.app)
 
+***Thanks to [symbl.ai](https://platform.symbl.ai/#/home) for transcript API*** 
+
 # Agile Implementation
 The Development was a series of continuous Integration and continuous Deployment. Each functionality was divided in weeks under SCRUM.  Each sprint’s goal was to build the most important features first and come out with a potentially deliverable product. Testing was done on Selenium IDE. Also even adapt feature which is taken as customer needs, was added in subsequent sprint.
 <br/>
@@ -40,7 +42,7 @@ Feature| Week 3| Screen Recording|3 |Completed
 Feature| Week 3| Transcript Added (Socket implementation remaining)| 2|Pending
 Feature|Week 4| Chat outside meeting (Adapt feature)|5|Completed
 Feature|Week 4|Authorization|3|Completed
-Procedure|Week 4|Testing Phase (on selenium)|3|Completed
+Procedure|Week 4|Testing Phase (on selenium IDE)|3|Completed
 Procedure|Week 4|Code cleaning|2|Completed
 
 # Pre Requisites
@@ -58,11 +60,6 @@ Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 
 The page will reload if you make edits.<br />
 You will also see any lint errors in the console.
-
-### `npm test`
-
-Launches the test runner in the interactive watch mode.<br />
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
 
 ### `npm run build`
 
