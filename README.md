@@ -93,6 +93,15 @@ Runs the app in the development mode.<br />
 Open [http://localhost:8000](http://localhost:8000) to run server.
 
 You will also see any errors or information in the console.
+# E-R Diagram
+![er](https://raw.githubusercontent.com/Shashwat-Sahu/microsoft-teams-assets/main/Picture1.png) 
+
+# Flow of functionalities
+## Group Video Call
+![video-call](https://raw.githubusercontent.com/Shashwat-Sahu/microsoft-teams-assets/main/Picture2.png) 
+
+## Screen share
+![screen-share-diagram](https://raw.githubusercontent.com/Shashwat-Sahu/microsoft-teams-assets/main/Picture3.png) 
 
 # Screenshots
 
