@@ -2,6 +2,7 @@
 Hey Code geek, welcome to my project 'Microsoft Teams Clone'. It was under the challenge of Engage Mentorship program 2021 by Microsoft. Its been a great journey and quite insightful too.
 <br/>
 Challenge was basically about connecting two people on teams via video calling. On above of that I incorporated following features:
+* [Join or Create Room](#create-room)
 * [Group Video Calling](#meeting)
 * [Meeting Chat (inside meeting)](#meeting-chats)
 * [Teams Chat (outside meeting)](#teams-chats)
