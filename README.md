@@ -98,8 +98,8 @@ You will also see any errors or information in the console.
 ![er](https://raw.githubusercontent.com/Shashwat-Sahu/microsoft-teams-assets/main/Picture1.png) 
 
 # Flow of functionalities
-## Group Video Call
-![video-call](https://raw.githubusercontent.com/Shashwat-Sahu/microsoft-teams-assets/main/Picture2.png) 
+## Group Video Call 
+<img src="https://raw.githubusercontent.com/Shashwat-Sahu/microsoft-teams-assets/main/Picture2.png" alt="video-call" width="450"/>
 
 ## Screen share
 ![screen-share-diagram](https://raw.githubusercontent.com/Shashwat-Sahu/microsoft-teams-assets/main/Picture3.png) 
