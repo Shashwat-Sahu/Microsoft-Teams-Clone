@@ -103,6 +103,7 @@ You will also see any errors or information in the console.
 
 ## Screen share
 <img src="https://raw.githubusercontent.com/Shashwat-Sahu/microsoft-teams-assets/main/Picture3.png" alt="screen-share-diagram" width="450"/>
+
 # Screenshots
 
 ## Sign In
