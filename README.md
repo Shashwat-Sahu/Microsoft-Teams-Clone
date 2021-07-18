@@ -45,6 +45,7 @@ Feature| Week 3| Screen Recording|3 |Completed
 Feature| Week 3| Transcript Added (Socket implementation remaining)| 2|Pending
 Feature|Week 4| Chat outside meeting (Adapt feature)|5|Completed
 Feature|Week 4|Authorization|3|Completed
+Feature| Week 4| Transcript Added (Socket implementation)| 2|Completed
 Procedure|Week 4|Testing Phase (on selenium IDE)|3|Completed
 Procedure|Week 4|Code cleaning|2|Completed
 
