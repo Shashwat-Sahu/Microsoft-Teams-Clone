@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import Avatar from "../assets/avatar.png";
 import Group_Connect from "../assets/home-right-vector.png";
-import { useHistory } from 'react-router-dom'
+import { Link, useHistory } from 'react-router-dom'
 import { connect } from 'react-redux';
 import { ToastContainer, toast } from 'react-toastify';
 import "../styles/signin.css"
@@ -84,6 +84,7 @@ const SignIn = (props) => {
           onChange={(e) => { setPassword(e.target.value) }}
 
         />
+
         {loader && <Loader
           type="BallTriangle"
           color="#00BFFF"
@@ -106,6 +107,7 @@ const SignIn = (props) => {
             Sign Up
           </button>
         </div>
+        <Link to="/forgotpassword" className="forgot-password">Forgot Password?</Link>
       </div>
       <img src={Group_Connect} alt="group connect" className="signin-bottom-vector" />
     </div>

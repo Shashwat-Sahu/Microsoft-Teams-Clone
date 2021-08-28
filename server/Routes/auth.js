@@ -124,7 +124,24 @@ router.post("/verifyotp",(req,res)=>{
       }
     });
 })
-  
+
+router.post("/forgotpassword",(req,res)=>{
+    const { email, password} = req.body
+    if (!email || !password) {
+        res.status(422).json({ error: "Please add email or password" })
+    }
+    bcrypt.hash(password, 12).then(hashedpassword =>
+    User.findOneAndUpdate({email},{
+        password : hashedpassword
+    }).then(user=>{
+        if (!user) {
+            return res.status(422).json({ error: "user does not exists" })
+        }
+        res.json({message:"Success"})
+    })
+    )
+}
+)
 
 
 module.exports = router

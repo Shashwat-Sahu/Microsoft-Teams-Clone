@@ -213,8 +213,12 @@ const MainComponent = (props) => {
                 setJoiningRoom(null)
                 if (joiningPath) {
                     // redirect
-                    history.push(`${joiningPath}/${RoomJoiningID}`)
-                    setJoiningPath(null)
+                    var jp = joiningPath
+                    setJoiningPath(null,()=>{
+                        history.push(`${jp}/${RoomJoiningID}`)
+                    })
+
+                    
                 }
             }
 
@@ -225,8 +229,11 @@ const MainComponent = (props) => {
             if (joiningRoom && err.response.data.error != "Room doesn't exist!") {
                 setJoiningRoom(null)
                 if (joiningPath) {
-                    history.push(`${joiningPath}/${RoomJoiningID}`)
-                    setJoiningPath(null)
+                    var jp = joiningPath
+                    setJoiningPath(null,()=>{
+                        history.push(`${jp}/${RoomJoiningID}`)
+                    })
+
                 }
             }
         })

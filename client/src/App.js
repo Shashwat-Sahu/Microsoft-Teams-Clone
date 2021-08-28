@@ -9,6 +9,7 @@ import { prodUrl as url } from "./Config/config.json"
 import { useHistory } from 'react-router-dom'
 import { connect } from 'react-redux';
 import MainComponent from "./components/MainComponent"
+import ForgotPassword from "./components/ForgotPassword";
 
 const Routing = (props) => {
   const history = useHistory();
@@ -44,7 +45,7 @@ const Routing = (props) => {
 
             <Route exact path="/signup" component={SignUp} />
             <Route path="/signin" component={SignIn} />
-
+            <Route path="/forgotpassword" component={ForgotPassword}/>
           </Switch>
           :
           <Switch>

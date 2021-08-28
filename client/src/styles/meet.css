@@ -281,6 +281,15 @@
 .other-options:hover .dropdown-meet{
     display: block;
 }
+.Transcript-down-position
+{
+    background-color: rgba(34, 34, 34, 0.822);
+    color: #fff;
+    font-size: 1.8em;
+    padding: 5px;
+    margin: 2px;
+    text-align: center;
+}
 @media screen and (max-width:660px) {
     .members-row{
         width: 100%;

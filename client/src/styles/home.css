@@ -191,6 +191,10 @@
     width: 40%;
     font-family: "Ubuntu";
 }
+.home-entry-buttons-disabled{
+    background-color: #aaa!important;
+    color: #555!important;
+}
 .home-entry-buttons:hover{
     cursor: pointer;
 }

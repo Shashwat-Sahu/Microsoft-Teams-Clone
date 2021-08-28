@@ -118,6 +118,7 @@ const Meet = (props) => {
   const [chats, setChats] = useState([])
   //set array of transcripts
   const [transcripts, setTranscripts] = useState([])
+  const [FrontalTranscript,setFrontalTranscript] = useState('')
   // store transcripts
   const transcriptsRef = useRef([])
   //open transcripts panel
@@ -364,7 +365,7 @@ const Meet = (props) => {
       // You can find the conversationId in event.message.data.conversationId;
       const data = JSON.parse(event.data);
       if (data.type === 'message' && data.message.hasOwnProperty('data')) {
-        // console.log('conversationId', data.message.data.conversationId);
+        console.log('conversationId', data.message.data.conversationId);
       }
       if (data.type === 'message_response') {
         var messagesConcatenation = "";
@@ -375,6 +376,7 @@ const Meet = (props) => {
           transcriptsRef.current = [...transcriptsRef.current, { name: message.from.userId == userId ? 'You' : message.from.name, message: message.payload.content }]
           setTranscripts(transcriptsRef.current)
         }
+        setFrontalTranscript('')
       }
       if (data.type === 'topic_response') {
         for (let topic of data.topics) {
@@ -387,13 +389,15 @@ const Meet = (props) => {
         }
       }
       if (data.type === 'message' && data.message.hasOwnProperty('punctuated')) {
-        // console.log('Live transcript (less accurate): ', data.message.punctuated.transcript)
+        // console.log('Live transcript (less accurate): ', data)
+        setFrontalTranscript( (data.message.user.userId == userId?'You':data.message.user.name) +": " + data.message.punctuated.transcript)
       }
-      // console.log(`Response type: ${data.type}. Object: `, data);
+      console.log(`Response type: ${data.type}. Object: `, data);
     };
 
     // Fired when the WebSocket closes unexpectedly due to an error or lost connetion
     ws.current.onerror = (err) => {
+      toast.error("Facing issue with transcript")
       console.error(err);
     };
 
@@ -463,6 +467,7 @@ const Meet = (props) => {
   const stopTranscripting = () => {
     if(ws.current)
     {
+      setFrontalTranscript('')
     ws.current.send(JSON.stringify({
       "type": "stop_request"
     }));
@@ -1050,7 +1055,7 @@ const Meet = (props) => {
                   <div className="member-name">
                     {name}
                   </div>
-                </div>
+                </div> 
               }
               {
                 peersRef.current.map(peer => {
@@ -1060,6 +1065,9 @@ const Meet = (props) => {
                 })
               }
             </div>
+            {FrontalTranscript?<div className="Transcript-down-position">
+              {FrontalTranscript}
+            </div>:null}
             <div className="meet-options">
               {
                 mic

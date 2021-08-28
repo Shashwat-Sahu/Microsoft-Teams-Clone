@@ -20,7 +20,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Modal from 'react-modal';
 import {CopyToClipboard} from 'react-copy-to-clipboard';
-
+import Loader from "react-loader-spinner";
 
 const Home = (props) => {
   const {
@@ -44,7 +44,7 @@ const Home = (props) => {
     display: camera ? "block" : "none"
   }
   const [modalIsOpen, setmodalIsOpen] = useState(false)
-
+  const [stable, setStable] = useState(false)
   const customStylesModal = {
     overlay: {
       backgroundColor: 'rgba(0,0,0,0.7)'
@@ -65,6 +65,7 @@ const Home = (props) => {
     MediaInit({ camera, mic, hostRef, setStream, setAudioDevices, setVideoDevices }).then((stream) => {
       setStream(stream)
       toast.info('Devices are working properly')
+      setStable(true)
     })
       .catch(err => {
         toast.error('Devices are not working properly')
@@ -158,12 +159,19 @@ const Home = (props) => {
         <div className="entry-box">
           <img src={Avatar} className="avatar-home" alt="Avatar" />
           <h1>Join your meeting !</h1>
+          {!stable?<><Loader
+          type="BallTriangle"
+          color="#00BFFF"
+          height={30}
+          width={30} />
+          <h6>Devices are loading ! Please wait</h6></>:null}
           <div className="home-entry-options">
             <button
-              className="home-entry-buttons"
+              className={`home-entry-buttons ${!stable?"home-entry-buttons-disabled":''}`}
               onClick={() => {
                 history.push(`/teams/${roomID}`)
               }}
+              disabled={!stable}
             >Join Now</button>
             <button
               className="home-entry-buttons"
