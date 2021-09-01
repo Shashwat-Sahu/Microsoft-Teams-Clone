@@ -114,7 +114,7 @@ You will also see any errors or information in the console.
 ![signup](https://raw.githubusercontent.com/Shashwat-Sahu/microsoft-teams-assets/main/signup.png)
 
 ## Teams Chats
-![teams chats](https://raw.githubusercontent.com/Shashwat-Sahu/microsoft-teams-assets/main/Screenshot%202021-07-11%20195107.png)
+![teams chats](https://github.com/Shashwat-Sahu/Video-Calling-with-transcript)
 
 ## Create Room
 ![create room](https://raw.githubusercontent.com/Shashwat-Sahu/microsoft-teams-assets/main/create%20room.png)
